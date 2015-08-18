@@ -58,7 +58,7 @@ webclient = {
         var name = req.body.Name;
 
         apiHomematic.manageDevice(address, name, function(result) {
-            updateDeviceList(function() {
+            apiHomematic.updateDeviceList(function() {
                 return res.redirect('/app');
             });
         });
