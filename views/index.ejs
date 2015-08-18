@@ -1,0 +1,8 @@
+<% layout('layout') -%>
+<% if (user && user.admin) { %>
+	<p>Hallo <%= user.displayName %>!</p>
+<% } else if(user && !user.admin) { %>
+	<p>Hallo <%= user.displayName %>!</p>
+<% } else { %>
+	<p>Hallo!</p>
+<% } %>
