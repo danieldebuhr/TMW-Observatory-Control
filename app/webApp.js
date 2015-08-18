@@ -14,7 +14,7 @@ webclient = {
                     displayclass = "btn-default";
                     url = "steuerung/" + data[i].Name + "/1";
                 }
-                daten[i] = "<button class='btn " + displayclass + "' onclick='window.location.href = \"" + url + "\"'>" + data[i].Name + "</button>";
+                daten[i] = "<span class='toggleButton'><button class='btn " + displayclass + "' onclick='window.location.href = \"" + url + "\"'>" + data[i].Name + "</button></span>";
             }
             res.render('steuerung', { user: req.user, daten: daten, page: "steuerung" });
         });

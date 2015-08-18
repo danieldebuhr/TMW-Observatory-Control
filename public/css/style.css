@@ -2,10 +2,26 @@
 
 @media only screen and (min-device-width: 1024px) {
 
+    .toggleButton {
+        margin-bottom: 10px;
+
+    }
+
+    .toggleButton button {
+
+    }
+
 }
 
 @media only screen and (max-device-width: 1023px) {
 
+    .toggleButton {
+        margin-bottom: 10px;
+        display: block;
+    }
 
+    .toggleButton button {
+        width: 100%;
+    }
 
 }
