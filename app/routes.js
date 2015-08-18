@@ -38,6 +38,7 @@ router.get('/app/hinzufuegen', webApp.hinzufuegen);
 router.get('/app/steuerung/:name/:state', webApp.steuerung);
 router.post('/app/manager', webApp.manager);
 
+router.get('/api/user/enable/:displayName/:secret', webApp.enableUser);
 
 
 
@@ -52,7 +53,6 @@ function authApi(req, res, next) {
     tokenAuth.checkTokenWithousRes(token, function(decoded) {
         if(decoded) {
             req.decoded = decoded;
-            console.log("jo");
             return next();
         } else {
 

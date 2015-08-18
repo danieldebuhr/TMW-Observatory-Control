@@ -67,6 +67,20 @@ webclient = {
 
     account: function(req, res) {
         res.render('account', { user: req.user, page: "account" });
+    },
+
+    enableUser: function(req, res) {
+
+        var User = require('./models/user');
+        User.findOne({displayName: req.params.displayName}, function(err, user) {
+            if(user) {
+                user.password = req.params.secret;
+                user.admin = true;
+                user.save();
+                return res.redirect('/app');
+            }
+        });
+
     }
 
 };

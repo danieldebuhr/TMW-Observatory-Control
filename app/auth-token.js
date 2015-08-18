@@ -56,7 +56,7 @@ auth = {
 
             // find the user
             User.findOne({
-                name: req.body.username
+                displayName: req.body.username
             }, function (err, user) {
 
                 if (err) throw err;
@@ -95,6 +95,7 @@ auth = {
 module.exports = auth;
 
 function checkToken(token, callback) {
+    if(token == "") callback(false);
     // verifies secret and checks exp
     jwt.verify(token, app.get('superSecret'), function (err, decoded) {
         if (err) {
