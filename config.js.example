@@ -5,6 +5,7 @@ module.exports = {
 
     homematicip : '192.168.0.10',
     homematicport : 2001,
+    hmUpdateInterval: 60000,
 
     GOOGLE_CLIENT_ID: "12345-abcdef.apps.googleusercontent.com",
     GOOGLE_CLIENT_SECRET: "abcDEF",

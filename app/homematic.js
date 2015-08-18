@@ -169,7 +169,7 @@ function startUpdateDeviceList() {
             console.log("Devices updated");
             startUpdateDeviceList();
         });
-    }, 5000);
+    }, config.hmUpdateInterval);
 }
 
 function updateDeviceList(callback) {
