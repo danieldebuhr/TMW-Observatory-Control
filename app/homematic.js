@@ -424,6 +424,7 @@ function setValue(addr, type, value, callback) {
     rpcClient.methodCall('setValue', [addr, getValType(type), value], function (err, rpcres) {
         if(err) throw err;
         callback();
+        manualUpdateDeviceState(addr, value);
     });
 }
 
