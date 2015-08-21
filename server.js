@@ -14,6 +14,8 @@ var config = require('./config');
 var port = process.env.PORT || 8080;
 mongoose.connect(config.database);
 
+app.io.set('transports', ['xhr-polling']);
+
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
