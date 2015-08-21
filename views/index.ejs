@@ -100,10 +100,6 @@
                     $(this).html("<img src='img/loader.gif' />");
                     toggleWithAjax(hmDevice, function(result) {
                         btn.text(text);
-                        if(hmDevice == "Dach auf" || hmDevice == "Dach zu") {
-                            updateList(hmDevice, result.value);
-                                updateAllDeviceButtons(devices);
-                        }
                     });
                 });
             }
@@ -244,12 +240,7 @@
             url: "api/toggle/" + hmDevice,
             cache: false
         }).done(function() {
-            $.ajax({
-                url: "api/get/" + hmDevice,
-                cache: false
-            }).done(function(result) {
-                callback(result);
-            });
+
         });
 
     }
