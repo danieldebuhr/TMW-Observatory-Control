@@ -1,0 +1,79 @@
+<% layout('layout'); -%>
+
+<div id="usercontrol">
+
+    <table class="table table-striped" id="tblUser">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th></th>
+            <th>Zugriff</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+
+
+</div>
+
+<div id="results">
+
+</div>
+
+
+<script>
+
+	var users = <%-JSON.stringify(userdata)%>;
+
+    $(document).ready(function() {
+
+        insertUserData(users);
+
+    });
+
+    function insertUserData(data) {
+        var users = data;
+        $('#tblUser > tbody').html("");
+        for(var i=0; i<=users.length-1; i++) {
+            if(users[i].admin) {
+                var zugriff = "<button onclick='enableOrDisableUser(\""+users[i]._id+"\", false)' class='btn btn-success'>Admin</button>"
+            } else {
+                var zugriff = "<button onclick='enableOrDisableUser(\""+users[i]._id+"\", true)' class='btn btn-efault'>Kein Zugriff</button>"
+            }
+            var tabelle = "<tr><td>"+users[i].displayName+"<br><small>"+users[i].id+"</small></td><td><img src='"+users[i].photo+"' style='max-width: 40px;' /></td><td>"+zugriff+"</td></tr>";
+            $('#tblUser > tbody:last').append(tabelle);
+        }
+    }
+
+
+    function apiCall(url, callback) {
+        $.ajax({
+            url: "api/" + url,
+            cache: false
+        }).done(function(result) {
+            if(callback) callback(result);
+        });
+    }
+
+    function enableOrDisableUser(user, enable) {
+
+        if(enable) {
+            var call = "user/enable/" + user;
+        } else {
+            var call = "user/disable/" + user;
+        }
+        apiCall(call, function(result) {
+            if(result.success) {
+                apiCall("user/get/all", function(userliste) {
+                    insertUserData(userliste.users);
+                })
+            } else {
+                alert("Error: " + result.message);
+            }
+        });
+
+    }
+
+</script>

@@ -1,8 +1,262 @@
-<% layout('layout') -%>
-<% if (user && user.admin) { %>
-	<p>Hallo <%= user.displayName %>!</p>
-<% } else if(user && !user.admin) { %>
-	<p>Hallo <%= user.displayName %>!</p>
-<% } else { %>
-	<p>Hallo!</p>
-<% } %>
+<% layout('layout'); -%>
+
+<div id="hmcontrol">
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Observatory</h3>
+        </div>
+        <div class="panel-body">
+
+            <div class="btn-group" role="group" aria-label="...">
+                <button class="btn btn-default" hm-device="Dach auf" id="dachAufButton">&Ouml;ffnen</button>
+                <button class="btn btn-default" hm-state="0" hm-group="Dach" id="stopButton">STOP</button>
+                <button class="btn btn-default" hm-device="Dach zu" id="dachZuButton">Schlie&szlig;en</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title">Left Control - Daniel</h3>
+        </div>
+        <div class="panel-body">
+
+            <button class="btn btn-default" hm-state="1" hm-group="GruppeA">Einschalten</button>
+            <button class="btn btn-default" hm-state="0" hm-group="GruppeA">Ausschalten</button>
+
+            &nbsp;&nbsp;&nbsp;
+
+            <button class="btn btn-default" hm-device="Kanal 1.1">Computer</button>
+            <button class="btn btn-default" hm-device="Kanal 1.2">Monitor</button>
+            <button class="btn btn-default" hm-device="Kanal 1.3">Montierung</button>
+            <button class="btn btn-default" hm-device="Kanal 1.4">Technik</button>
+
+            &nbsp;&nbsp;&nbsp;
+
+            <button class="btn btn-default" hm-url="push/short/PC Knopf Daniel">PC <small>short press</small></button>
+            <button class="btn btn-default" hm-url="push/long/PC Knopf Daniel">PC <small>cold shutdown</small></button>
+
+        </div>
+    </div>
+
+    <div class="panel panel-warning">
+        <div class="panel-heading">
+            <h3 class="panel-title">Right Control - Markus</h3>
+        </div>
+        <div class="panel-body">
+
+            <button class="btn btn-default" hm-state="1" hm-group="GruppeB">Einschalten</button>
+            <button class="btn btn-default" hm-state="0" hm-group="GruppeB">Ausschalten</button>
+
+            &nbsp;&nbsp;&nbsp;
+
+            <button class="btn btn-default" hm-device="Kanal 2.1">Computer</button>
+            <button class="btn btn-default" hm-device="Kanal 2.2">Monitor</button>
+            <button class="btn btn-default" hm-device="Kanal 2.3">Montierung</button>
+            <button class="btn btn-default" hm-device="Kanal 2.4">Technik</button>
+
+            &nbsp;&nbsp;&nbsp;
+
+            <button class="btn btn-default" hm-url="push/short/PC Knopf Markus">PC <small>short press</small></button>
+            <button class="btn btn-default" hm-url="push/long/PC Knopf Markus">PC <small>cold shutdown</small></button>
+
+        </div>
+    </div>
+
+</div>
+
+<div id="results">
+
+</div>
+
+<script>
+
+	var devices = <%-JSON.stringify(devices)%>;
+	var groups = <%-JSON.stringify(groups)%>;
+
+    $(document).ready(function() {
+
+        updateAllDeviceButtons(devices);
+
+        $("button").each(function() {
+
+            var btn = $(this);
+            var hmDevice = btn.attr('hm-device');
+            var hmGroup = btn.attr('hm-group');
+            var hmState = btn.attr('hm-state');
+            var hmUrl = btn.attr('hm-url');
+
+            if(hmDevice) {
+                $(this).click(function() {
+                    var text = btn.text();
+                    $(this).html("<img src='img/loader.gif' />");
+                    toggleWithAjax(hmDevice, function(result) {
+
+                        if(result.value == true) {
+                            btn.removeClass('btn-default');
+                            btn.addClass('btn-success');
+                        } else {
+                            btn.removeClass('btn-success');
+                            btn.addClass('btn-default');
+                        }
+                        btn.text(text);
+
+                        if(hmDevice == "Dach auf" || hmDevice == "Dach zu") {
+                            updateList(hmDevice, result.value);
+
+                                updateAllDeviceButtons(devices);
+
+                        }
+
+                    });
+                });
+            }
+
+            if(hmGroup) {
+                $(this).click(function() {
+                    var text = btn.text();
+                    $(this).html("<img src='img/loader.gif' />");
+                    setGroupWithAjax(hmGroup, hmState, function(result) {
+                        updateAllDeviceButtons(result);
+                        btn.text(text);
+                    });
+                });
+            }
+
+            if(hmUrl) {
+                $(this).click(function() {
+                    var text = btn.text();
+                    $(this).html("<img src='img/loader.gif' />");
+                    loadHmUrlWithAjax(hmUrl, function(result) {
+                        btn.text(text);
+                    });
+                });
+            }
+
+        });
+
+        startRegularUpdate();
+
+    });
+
+    function startRegularUpdate() {
+        setTimeout(function() {
+            updateDeviceList(function(devs) {
+                updateAllDeviceButtons(devs);
+                startRegularUpdate();
+            });
+        }, 8000);
+    }
+
+    function updateAllDeviceButtons(devicelist) {
+
+        var sperre_dach_zu = false;
+        var sperre_dach_auf = false;
+
+        $("button").each(function() {
+
+            var btn = $(this);
+            var hmDevice = btn.attr('hm-device');
+
+            for(var i=0; i <= devicelist.length-1; i++) {
+                if(hmDevice == devicelist[i].Name) {
+                    if(devicelist[i].Value == true && btn.hasClass('btn-default')) {
+                        btn.removeClass('btn-default');
+                        btn.addClass('btn-success');
+                        btn.effect("pulsate");
+                    } else if(devicelist[i].Value == false && btn.hasClass('btn-success')) {
+                        btn.removeClass('btn-success');
+                        btn.addClass('btn-default');
+                        btn.effect("pulsate");
+                    }
+
+                    if(devicelist[i].Name == "Dach auf" && devicelist[i].Value == true) {
+                        sperre_dach_zu = true;
+                    }
+                    if(devicelist[i].Name == "Dach zu" && devicelist[i].Value == true) {
+                        sperre_dach_auf = true;
+                    }
+
+                }
+            }
+
+        });
+
+        if(sperre_dach_auf) {
+            $("#dachAufButton").prop( "disabled", true );
+            $("#dachZuButton").prop( "disabled", false );
+        } else if(sperre_dach_zu) {
+            $("#dachAufButton").prop( "disabled", false );
+            $("#dachZuButton").prop( "disabled", true );
+        } else {
+            $("#dachAufButton").prop( "disabled", false );
+            $("#dachZuButton").prop( "disabled", false );
+        }
+
+    }
+
+    function updateList(name, value) {
+        for(var i=0; i <= devices.length-1; i++) {
+            if(name == devices[i].Name) {
+                devices[i].Value = value;
+            }
+        }
+    }
+
+    function toggleWithAjax(hmDevice, callback) {
+
+        $.ajax({
+            url: "api/toggle/" + hmDevice,
+            cache: false
+        }).done(function() {
+            $.ajax({
+                url: "api/get/" + hmDevice,
+                cache: false
+            }).done(function(result) {
+                callback(result);
+            });
+        });
+
+    }
+
+    function setGroupWithAjax(hmGroup, state, callback) {
+
+        $.ajax({
+            url: "api/set/g/" + hmGroup + "/" + state,
+            cache: false
+        }).done(function() {
+
+            $.ajax({
+                url: "api/get/devices",
+                cache: false
+            }).done(function(result) {
+                callback(result);
+            });
+
+        });
+
+    }
+
+    function updateDeviceList(callback) {
+        $.ajax({
+            url: "api/get/devices/update",
+            cache: false
+        }).done(function(result) {
+            devices = result;
+            if(callback) callback(result);
+        });
+    }
+
+    function loadHmUrlWithAjax(url, callback) {
+        $.ajax({
+            url: "api/" + url,
+            cache: false
+        }).done(function(result) {
+            devices = result;
+            if(callback) callback(result);
+        });
+    }
+
+</script>

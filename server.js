@@ -7,6 +7,8 @@ var cookieParser    = require('cookie-parser');
 var expressSession  = require('express-session');
 var ejs             = require('ejs-locals');
 var passport        = require('passport');
+var flash           = require('connect-flash');
+
 
 var config = require('./config');
 
@@ -17,6 +19,8 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(morgan('dev'));
+
+app.use(flash());
 
 app.set('views', __dirname + '/views');
 app.engine('ejs', ejs);

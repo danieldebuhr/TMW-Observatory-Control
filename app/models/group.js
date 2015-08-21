@@ -3,8 +3,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 // set up a mongoose model and pass it using module.exports
-module.exports = mongoose.model('Datapoint', new Schema({
-    Address: String,
-    Type: String,
-    Name: String
+module.exports = mongoose.model('Group', new Schema({
+    Name: String,
+    DatapointNames: []
 }));

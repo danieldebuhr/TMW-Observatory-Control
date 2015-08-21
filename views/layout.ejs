@@ -1,60 +1,76 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>TheMilkyWay Observatory Control</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-		<link rel="stylesheet" href="css/normalize.css">
-		<link rel="stylesheet" href="css/style.css">
-		<link rel="stylesheet" href="css/bootstrap.min.css">
-		<link rel="stylesheet" href="css/bootstrap-theme.min.css">
-		<script src="js/jquery-2.1.4.min.js"></script>
-		<script src="js/bootstrap.min.js"></script>
-	</head>
-	<body>
+<head>
+    <title>TheMilkyWay Observatory Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="css/jquery-ui.min.css">
 
-		<nav class="navbar navbar-default">
-			<div class="container-fluid">
+    <script src="js/jquery-2.1.4.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+</head>
+<body>
 
-				<!-- Brand and toggle get grouped for better mobile display -->
-				<div class="navbar-header">
-					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-						<span class="sr-only">Toggle navigation</span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					</button>
-					<a class="navbar-brand" href="/app">The Milky Way OC</a>
-				</div>
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
 
-				<!-- Collect the nav links, forms, and other content for toggling -->
-				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1"  style="margin-right: 0; padding-right: 0;">
-					<ul class="nav navbar-nav">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/app">The Milky Way OC</a>
+        </div>
 
-						<% if (user && user.admin) { %>
-						<li <% if(page == "steuerung") { %>class="active"<% } %>><a href="/app">Steuerung</a></li>
-						<li <% if(page == "hinzufuegen") { %>class="active"<% } %>><a href="/app/hinzufuegen">Hinzuf&uuml;gen</a></li>
-						<li <% if(page == "account") { %>class="active"<% } %>><a href="/app/account">Profil</a></li>
-						<% } %>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1"
+             style="margin-right: 0; padding-right: 0;">
+            <ul class="nav navbar-nav">
 
-					</ul>
+                <% if (user && user.admin) { %>
+                <li <% if(page == "index") { %>class="active"
+                        <% } %>
+                        ><a href="/">Management</a></li>
+                <li <% if(page == "steuerung") { %>class="active"
+                        <% } %>
+                        ><a href="/steuerung">System</a></li>
+                <li <% if(page == "hinzufuegen") { %>class="active"
+                        <% } %>
+                        ><a href="/hinzufuegen">Hinzuf&uuml;gen</a></li>
+                <li <% if(page == "user") { %>class="active"
+                        <% } %>
+                        ><a href="/benutzer">Benutzer</a></li>
+                <li <% if(page == "account") { %>class="active"
+                        <% } %>
+                        ><a href="/account">Profil</a></li>
+                <% } %>
+
+            </ul>
 
 
+            <ul class="nav navbar-nav navbar-right" style="margin-right: 0; padding-right: 0;">
+                <% if (!user) { %>
+                <li><a href="/login">Anmelden</a></li>
+                <% } else { %>
+                <li><a href="/logout">Abmelden</a></li>
+                <% } %>
+            </ul>
 
-					<ul class="nav navbar-nav navbar-right" style="margin-right: 0; padding-right: 0;">
-						<% if (!user) { %>
-							<li><a href="/login">Anmelden</a></li>
-						<% } else { %>
-							<li><a href="/logout">Abmelden</a></li>
-						<% } %>
-					</ul>
+            <% if(page == "steuerung") { %>
+            <a class="btn btn-default navbar-btn navbar-right" href="/refresh">
+                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+            </a>
+            <% } %>
 
-					<% if(page == "steuerung") { %>
-					<a class="btn btn-default navbar-btn navbar-right" href="/app/refresh">
-						<span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
-					</a>
-					<% } %>
-
-					<!--
+            <!--
 					<ul class="nav navbar-nav navbar-right" style="margin-right: 0; padding-right: 0;">
 						<li class="dropdown">
 
@@ -74,13 +90,34 @@
 						</li>
 					</ul>
 					-->
-				</div><!-- /.navbar-collapse -->
-			</div><!-- /.container-fluid -->
-		</nav>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container-fluid -->
+</nav>
 
-		<div class="container-fluid">
-			<%- body %>
-		</div>
+<div class="container-fluid">
+    <%
+    if (typeof success != 'undefined') {
+        if(success.length > 0) {
+            %>
+            <div class="alert alert-success" role="alert"><%= success %></div>
+            <%
+        }
+    }
+    %>
+    <%
+    if (typeof error != 'undefined') {
+        if(error.length > 0) {
+            %>
+            <div class="alert alert-danger" role="alert"><%= error %></div>
+            <%
+        }
+    }
+    %>
 
-	</body>
+    <%- body %>
+</div>
+
+</body>
 </html>

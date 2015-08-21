@@ -65,8 +65,13 @@ auth = {
                     res.json({success: false, message: 'Authentication failed. User not found.'});
                 } else if (user) {
 
-                    // check if password matches
-                    if (user.password == req.body.password) {
+
+                    // Only User with password can get a token (eg. System Accounts for other applications)
+                    if(user.password == "") {
+                        res.json({success: false, message: 'User cannot get a token.'})
+
+                        // check if password matches
+                    } else if (user.password == req.body.password) {
                         res.json({success: false, message: 'Authentication failed. Wrong password.'});
                     } else {
                         // if user is found and password is right
