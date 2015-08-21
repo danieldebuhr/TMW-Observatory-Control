@@ -3,6 +3,7 @@ console.log("homematic.js loaded");
 var config      = require('./../config'); // get our config file
 var rpc         = require('binrpc');
 var forEach     = require('async-foreach').forEach;
+var io          = require('./socket.io');
 
 var rpcClient = rpc.createClient({host: config.homematicip, port: config.homematicport});
 
@@ -39,6 +40,7 @@ var homematic = {
                 dataPoint.findOne({Name: item}, function(err, dp) {
                     if(dp) {
                         setValue(dp.Address, dp.Type, value, function() {
+                            io.sendUpdate(item, value);
                             manualUpdateDeviceState(dp.Address, value, function() {
                                 done();
                             });
