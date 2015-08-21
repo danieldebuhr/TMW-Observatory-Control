@@ -240,7 +240,7 @@
             url: "api/toggle/" + hmDevice,
             cache: false
         }).done(function() {
-
+            if(callback) callback();
         });
 
     }
