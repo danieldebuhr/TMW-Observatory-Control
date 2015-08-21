@@ -8,8 +8,7 @@ var expressSession  = require('express-session');
 var ejs             = require('ejs-locals');
 var passport        = require('passport');
 var flash           = require('connect-flash');
-
-
+var socketio        = require('./app/socket.io.js');
 var config = require('./config');
 
 var port = process.env.PORT || 8080;
@@ -46,7 +45,7 @@ app.all('/*', function(req, res, next) {
 
 require("./app/auth-google.js")(app, passport);
 require("./app/routes-google.js")(app, passport);
-require('./app/socket.io.js')(app);
+socketio.startSocketServer(app);
 
 app.use('/', require('./app/routes.js'));
 

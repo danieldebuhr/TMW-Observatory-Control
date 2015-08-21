@@ -1,22 +1,19 @@
 console.log("socket.io loaded");
 
-var ioapp = null;
+var app = {};
 
-module.exports = function(app) {
+module.exports = {
 
-    if(app) ioapp = app;
+    startSocketServer: function (new_app) {
+        app = new_app;
+        app.io.sockets.on('connection', function (socket) {
+            console.log("new connection: " + socket.id);
+        });
+    },
 
-    // Setup the ready route, and emit talk event.
-    ioapp.io.on('connection', function(req) {
-        console.log("Socket.io Verbindung hergestellt.");
-    });
-
-    return {
-        sendUpdate: function(name, state) {
-            if(ioapp) {
-                ioapp.io.broadcast('updateDevice', {name: name, state: state});
-            }
-        }
+    sendUpdate: function(name, state) {
+        console.log("Broadcast updateDevice", name, state);
+        app.io.broadcast('updateDevice', {name: name, state: state});
     }
 
 };

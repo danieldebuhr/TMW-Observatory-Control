@@ -78,7 +78,7 @@
 
     $(document).ready(function() {
 
-        io = io.connect()
+        io = io.connect();
 
         io.on('updateDevice', function(data) {
             updateDevice(data.name, data.state);
@@ -182,6 +182,8 @@
     }
 
     function updateDevice(buttonName, value) {
+
+        console.log("Got Device Update", buttonName, value);
 
         var sperre_dach_zu = false;
         var sperre_dach_auf = false;

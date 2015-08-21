@@ -1,7 +1,7 @@
 var dataPoint   = require('./../app/models/datapoint');
 var group       = require('./../app/models/group');
 var homematic   = require('./homematic');
-var io          = require('./socket.io')();
+var io          = require('./socket.io');
 
 var homematicWeb = {
 
