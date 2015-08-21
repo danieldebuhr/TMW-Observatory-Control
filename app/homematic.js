@@ -361,6 +361,7 @@ function updateDeviceList(callback) {
     });
     function allDone(notAborted, arr) {
         deviceList = tmp_values;
+        console.log("DeviceList updated");
         if(callback) callback();
     }
 
