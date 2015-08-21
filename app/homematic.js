@@ -453,7 +453,7 @@ function manualUpdateDeviceState(address, value, callback) {
             deviceList[index].Value = value;
         }
     }, function() {
-        callback();
+        if(callback) callback();
     });
 }
 
