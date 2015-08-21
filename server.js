@@ -9,7 +9,7 @@ var ejs             = require('ejs-locals');
 var passport        = require('passport');
 var flash           = require('connect-flash');
 var socketio        = require('./app/socket.io.js');
-var config = require('./config');
+var config          = require('./config');
 
 var port = process.env.PORT || 8080;
 mongoose.connect(config.database);
