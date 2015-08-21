@@ -1,5 +1,5 @@
-var express         = require('express');
-var app             = express();
+var express         = require('express.io');
+var app             = express().http().io();
 var bodyParser      = require('body-parser');
 var morgan          = require('morgan');
 var mongoose        = require('mongoose');
@@ -46,15 +46,9 @@ app.all('/*', function(req, res, next) {
 
 require("./app/auth-google.js")(app, passport);
 require("./app/routes-google.js")(app, passport);
+require('./app/socket.io.js')(app);
 
 app.use('/', require('./app/routes.js'));
-
-app.use(function(req, res, next) {
-    //var err = new Error('Not Found');
-    //err.status = 404;
-    //next(err);
-    res.render('404', {user: null, page: null});
-});
 
 app.listen(port);
 console.log('Magic happens at http://localhost:' + port);

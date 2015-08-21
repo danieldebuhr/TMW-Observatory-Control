@@ -4,7 +4,7 @@
   "dependencies": {
     "morgan": "^1.6.1",
     "body-parser": "^1.13.3",
-    "express": "^4.13.3",
+    "express.io": ">= 0.0.0",
     "jsonwebtoken": "^5.0.4",
     "mongoose": "^4.1.1",
     "homematic-xmlrpc": "^1.0.1",

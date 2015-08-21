@@ -78,6 +78,12 @@
 
     $(document).ready(function() {
 
+        io = io.connect()
+
+        io.on('updateDevice', function(data) {
+            updateDevice(data.name, data.state);
+        });
+
         updateAllDeviceButtons(devices);
 
         $("button").each(function() {
@@ -93,23 +99,11 @@
                     var text = btn.text();
                     $(this).html("<img src='img/loader.gif' />");
                     toggleWithAjax(hmDevice, function(result) {
-
-                        if(result.value == true) {
-                            btn.removeClass('btn-default');
-                            btn.addClass('btn-success');
-                        } else {
-                            btn.removeClass('btn-success');
-                            btn.addClass('btn-default');
-                        }
                         btn.text(text);
-
                         if(hmDevice == "Dach auf" || hmDevice == "Dach zu") {
                             updateList(hmDevice, result.value);
-
                                 updateAllDeviceButtons(devices);
-
                         }
-
                     });
                 });
             }
@@ -137,18 +131,8 @@
 
         });
 
-        startRegularUpdate();
-
     });
 
-    function startRegularUpdate() {
-        setTimeout(function() {
-            updateDeviceList(function(devs) {
-                updateAllDeviceButtons(devs);
-                startRegularUpdate();
-            });
-        }, 8000);
-    }
 
     function updateAllDeviceButtons(devicelist) {
 
@@ -165,11 +149,11 @@
                     if(devicelist[i].Value == true && btn.hasClass('btn-default')) {
                         btn.removeClass('btn-default');
                         btn.addClass('btn-success');
-                        btn.effect("pulsate");
+                        btn.effect("highlight");
                     } else if(devicelist[i].Value == false && btn.hasClass('btn-success')) {
                         btn.removeClass('btn-success');
                         btn.addClass('btn-default');
-                        btn.effect("pulsate");
+                        btn.effect("highlight");
                     }
 
                     if(devicelist[i].Name == "Dach auf" && devicelist[i].Value == true) {
@@ -193,6 +177,53 @@
         } else {
             $("#dachAufButton").prop( "disabled", false );
             $("#dachZuButton").prop( "disabled", false );
+        }
+
+    }
+
+    function updateDevice(buttonName, value) {
+
+        var sperre_dach_zu = false;
+        var sperre_dach_auf = false;
+
+        $("button").each(function() {
+
+            var btn = $(this);
+            var hmDevice = btn.attr('hm-device');
+
+            if(buttonName == hmDevice) {
+
+                if(value == true && btn.hasClass('btn-default')) {
+                    btn.removeClass('btn-default');
+                    btn.addClass('btn-success');
+                    btn.effect("highlight");
+                } else if(value == false && btn.hasClass('btn-success')) {
+                    btn.removeClass('btn-success');
+                    btn.addClass('btn-default');
+                    btn.effect("highlight");
+                }
+
+            }
+
+        });
+
+        if(buttonName == "Dach auf" || buttonName == "Dach zu") {
+            if (buttonName == "Dach auf" && value == true) {
+                var sperre_dach_zu = true;
+            }
+            if (buttonName == "Dach zu" && value == true) {
+                var sperre_dach_auf = true;
+            }
+            if(sperre_dach_auf) {
+                $("#dachAufButton").prop( "disabled", true );
+                $("#dachZuButton").prop( "disabled", false );
+            } else if(sperre_dach_zu) {
+                $("#dachAufButton").prop( "disabled", false );
+                $("#dachZuButton").prop( "disabled", true );
+            } else {
+                $("#dachAufButton").prop( "disabled", false );
+                $("#dachZuButton").prop( "disabled", false );
+            }
         }
 
     }

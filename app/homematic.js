@@ -1,3 +1,5 @@
+console.log("homematic.js loaded");
+
 var config      = require('./../config'); // get our config file
 var rpc         = require('binrpc');
 var forEach     = require('async-foreach').forEach;

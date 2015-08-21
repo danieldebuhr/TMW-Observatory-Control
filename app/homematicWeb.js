@@ -1,6 +1,7 @@
 var dataPoint   = require('./../app/models/datapoint');
 var group       = require('./../app/models/group');
 var homematic   = require('./homematic');
+var io          = require('./socket.io')();
 
 var homematicWeb = {
 
@@ -127,6 +128,7 @@ var homematicWeb = {
         homematic.findDeviceByName(name, function(dp) {
             if(!dp) return res.json({success: false, message: "Device not found"});
             homematic.toggleDevice(dp.Address, dp.Type, function (result) {
+                io.sendUpdate(name, result.newval);
                 return res.json(result);
             });
         });
@@ -155,6 +157,7 @@ var homematicWeb = {
             } else {
 
                 homematic.setValue(dp.Address, dp.Type, state, function () {
+                    io.sendUpdate(name, state);
                     return res.json({success: true});
                 });
 
