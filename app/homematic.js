@@ -6,8 +6,45 @@ var forEach     = require('async-foreach').forEach;
 var io          = require('./socket.io');
 
 var rpcClient = rpc.createClient({host: config.homematicip, port: config.homematicport});
+var rpcServer = rpc.createServer({port: config.homematic_rpclistenport }); //host: config.homematic_rpclistenip,
+
+var timeDachAuf = null;
+var timeDachZu = null;
+
+rpcServer.on('event', function (err, params, callback) {
+
+    if(params[0] == "rf2wired") {
+        var id = findDeviceIndexByAddr(params[1]);
+        if(id) {
+            if(params[2] == "STATE") {
+                console.log("HM-RPC-Event: ", params);
+                manualUpdateDeviceState(params[1], params[3]);
+            }
+        }
+    }
+
+});
+
+rpcServer.on('disconnect', function() {
+   console.log("HM-RPC-Verbindung beendet.");
+});
+
+rpcClient.on('connect', function () {
+    var url = 'xmlrpc_bin://' + config.homematic_rpclistenip + ':' + config.homematic_rpclistenport;
+    console.log("HM-RPC-Verbindung initialisieren...");
+    rpcClient.methodCall('init', [url, 'rf2wired'], function (err, res) {
+        console.log('HM-RPC-Verbindung hergestellt', err, res);
+    });
+});
 
 var deviceList = [];
+
+function findDeviceIndexByAddr(addr) {
+    for(var i = 0; i<=deviceList.length-1; i++) {
+        if(deviceList[i].Address == addr) return i;
+    }
+    return false;
+}
 
 var homematic = {
 
@@ -40,7 +77,6 @@ var homematic = {
                 dataPoint.findOne({Name: item}, function(err, dp) {
                     if(dp) {
                         setValue(dp.Address, dp.Type, value, function() {
-                            io.sendUpdate(item, value);
                             manualUpdateDeviceState(dp.Address, value, function() {
                                 done();
                             });
@@ -363,7 +399,7 @@ function updateDeviceList(callback) {
     });
     function allDone(notAborted, arr) {
         deviceList = tmp_values;
-        console.log("DeviceList updated");
+        //console.log("DeviceList updated", deviceList);
         if(callback) callback();
     }
 
@@ -396,6 +432,7 @@ function initialDeviceList() {
 function getValType(type) {
     if(type == "DIMMER") return "LEVEL";
     if(type == "SWITCH") return "STATE";
+    if(type == "SHUTTER_CONTACT") return "STATE";
     return false;
 }
 
@@ -424,11 +461,30 @@ function getValueBase(addr, value, callback) {
  * @param callback
  */
 function setValue(addr, type, value, callback) {
-    rpcClient.methodCall('setValue', [addr, getValType(type), value], function (err, rpcres) {
-        if(err) throw err;
+
+    if(type == "SWITCH") {
+
+        // Handelt es sich um das Dach?
+        var id = findDeviceIndexByAddr(addr);
+        if(id) {
+            if(deviceList[id].Name == "Dach auf") {
+                timeDachAuf = new Date();
+                io.sendRoofUpdate("Dach auf", timeDachAuf);
+            } else if(deviceList[id].Name == "Dach zu") {
+                timeDachAuf = new Date();
+                io.sendRoofUpdate("Dach zu", timeDachZu);
+            }
+        }
+
+        rpcClient.methodCall('setValue', [addr, getValType(type), value], function (err, rpcres) {
+            if(err) throw err;
+            callback();
+            manualUpdateDeviceState(addr, value);
+        });
+    } else {
+        console.log("setValue - Error: Nur SWITCH kann geschaltet werden.");
         callback();
-        manualUpdateDeviceState(addr, value);
-    });
+    }
 }
 
 /**
@@ -453,6 +509,8 @@ function manualUpdateDeviceState(address, value, callback) {
     forEach(deviceList, function (item, index, arr) {
         if(deviceList[index].Address == address) {
             deviceList[index].Value = value;
+            //console.log("Device-Update", address, deviceList[index].Name, value);
+            io.sendUpdate(deviceList[index].Name, value);
         }
     }, function() {
         if(callback) callback();
