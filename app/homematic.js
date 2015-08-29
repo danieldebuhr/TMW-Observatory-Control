@@ -46,6 +46,26 @@ function findDeviceIndexByAddr(addr) {
     return false;
 }
 
+setTimeout(function() {
+    updateOnActive();
+}, 1000);
+
+function updateOnActive() {
+    if(io.checkOnlineClients() > 0) {
+        setTimeout(function() {
+            updateDeviceList(function() {
+                updateOnActive();
+            });
+        }, 5000);
+    } else {
+        setTimeout(function() {
+            updateOnActive();
+        }, 5000);
+    }
+}
+
+
+
 var homematic = {
 
     /**
@@ -393,6 +413,7 @@ function updateDeviceList(callback) {
             var done = this.async();
             getValueBase(item.Address, getValType(item.Type), function(i) {
                 if(i != null) tmp_values.push({Address: item.Address, Name: item.Name, Value: i});
+                io.sendUpdate(item.Name, i);
                 done();
             });
         }, allDone);

@@ -15,6 +15,10 @@ module.exports = {
 
     },
 
+    checkOnlineClients: function() {
+        return app.io.sockets.clients().length;
+    },
+
     sendUpdate: function(name, state) {
         console.log("Socket.io - Send Update", name, state);
         app.io.broadcast('updateDevice', {name: name, state: state});
