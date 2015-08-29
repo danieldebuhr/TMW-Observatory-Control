@@ -109,6 +109,8 @@
 
 <script>
 
+
+
     io = io.connect();
 
 	var devices = <%-JSON.stringify(devices)%>;
@@ -128,9 +130,13 @@
     var anzahl_bilder = 37;
     var letztes_bild = 1;
 
-    // DACH VARIABLEN STOP
+    var max_width = 100;
+
+        // DACH VARIABLEN STOP
 
     $(document).ready(function() {
+
+        max_width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
 
         var dachstatus = false;
 
@@ -444,7 +450,8 @@
     }
 
     function initRoof() {
-        progress_image = $("<img/>").attr('src', "img/sternwarte_progress/" + getImage(prozentwert) + '.jpg');
+        console.log(max_width);
+        progress_image = $("<img/>").attr('src', "img/sternwarte_progress/" + getImage(prozentwert) + '.jpg').css('max-width', max_width-100);
         $("#progress").append(progress_image);
     }
 
