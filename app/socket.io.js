@@ -1,32 +1,48 @@
-console.log("socket.io loaded");
+console.log("SIO :: Loaded");
 
-var app = {};
 
-module.exports = {
+var hm = null;
+
+var io = {
 
     startSocketServer: function (new_app) {
+
         app = new_app;
+
         app.io.sockets.on('connection', function (socket) {
-            console.log("Socket.io - Neue Verbindung mit " + socket.id);
+
+            console.log("SIO <- New Connection " + socket.handshake.address.address);
+            console.log("SIO :: Client-Count #", app.io.sockets.clients().length);
+
             socket.on('disconnect', function() {
-                console.log("Socket.io - Verbindung beendet mit " + socket.id)
-            })
+                console.log("SIO :: Close Connection " + socket.handshake.address.address);
+                console.log("SIO :: Client-Count #", app.io.sockets.clients().length);
+            });
+
+            socket.on('toggle', function(device) {
+                console.log("SIO :: Toggle: ", device.Name);
+                hm.toggle(device, function(success, message) {
+                    console.log("SIO :: Toggle: ", device.Name, success, message);
+                })
+            });
+
         });
 
+    },
+
+    initHm: function (new_hm) {
+        hm = new_hm;
     },
 
     checkOnlineClients: function() {
         return app.io.sockets.clients().length;
     },
 
-    sendUpdate: function(name, state) {
-        console.log("Socket.io - Send Update", name, state);
-        app.io.broadcast('updateDevice', {name: name, state: state});
-    },
-
-    sendRoofUpdate: function(dachname, time) {
-        console.log("Socket.io - Sende Dach-Update", dachname, time);
-        app.io.broadcast('roofUpdate', {dach: dachname, time: time});
+    sendUpdate: function(device) {
+        console.log("SIO -> update [", device.Name, ",", device.State, "]");
+        app.io.broadcast('updateDevice', {device: device});
     }
 
 };
+
+module.exports = io;

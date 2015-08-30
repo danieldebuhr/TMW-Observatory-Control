@@ -1,0 +1,76 @@
+<% layout('layout') -%>
+
+<script>
+
+    var devices = <%-JSON.stringify(devices)%>;
+
+    $(document).ready(function() {
+
+        var sel = $("#selectDevice");
+
+        sel.append($('<option>', {
+            value: "",
+            text: "Bitte Device waehlen..."
+        }));
+
+        for(addr in devices) {
+            $('#selectDevice').append($('<option>', {
+                value: addr,
+                text: devices[addr].Name
+            }));
+        }
+
+        sel.change(function() {
+            if(this.value == "") {
+                $("#del").hide();
+            } else {
+                $("#del").show();
+            }
+            $("#Address").val(devices[this.value].Address);
+            $("#Name").val(devices[this.value].Name);
+            $("#Kategorie").val(devices[this.value].Kategorie);
+            $("#DachAuf").prop('checked', devices[this.value].DachAuf == true);
+            $("#DachZu").prop('checked', devices[this.value].DachZu == true);
+        });
+
+        $("#del").click(function() {
+            window.location.href = "deleteDevice/" + sel.val();
+        });
+
+    });
+
+</script>
+
+<select id="selectDevice" class="form-control"></select>
+
+<form action="deviceManager" method="post" style="margin-top:50px;">
+    <div class="form-group">
+        <label for="Addresse">Adresse</label>
+        <input type="text" class="form-control" id="Address" name="Address" placeholder="LEQ123456:1">
+    </div>
+    <div class="form-group">
+        <label for="Name">Name</label>
+        <input type="text" class="form-control" id="Name" name="Name" placeholder="Montierung">
+    </div>
+    <div class="form-group">
+        <label for="Kategorie">Kategorie</label>
+        <input type="text" class="form-control" id="Kategorie" name="Kategorie" placeholder="Markus">
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" id="DachAuf" value="true" name="DachAuf"> Dach auf - Schalter?
+        </label>
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" id="DachZu" value="true" name="DachZu"> Dach zu - Schalter?
+        </label>
+    </div>
+    <p><i>Es darf in der gesamten Konfiguration nur einen Dach Auf und einen Dach Zu Schalter geben!</i></p>
+
+    <button type="submit" class="btn btn-default">Absenden</button>
+</form>
+
+<br><br>
+
+<button class="btn btn-danger" style="display: none;" id="del">Ausgew&auml;hltes Device l&ouml;schen</button>

@@ -6,5 +6,11 @@ var Schema = mongoose.Schema;
 module.exports = mongoose.model('Datapoint', new Schema({
     Address: String,
     Type: String,
-    Name: String
+    Name: String,
+    Version: String,
+    State: String,
+    Kategorie: String,
+    Position: Number,
+    DachAuf: Boolean,
+    DachZu: Boolean
 }));

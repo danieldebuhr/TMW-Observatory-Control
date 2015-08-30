@@ -1,7 +1,6 @@
 var express         = require('express.io');
 var app             = express().http().io();
 var bodyParser      = require('body-parser');
-var morgan          = require('morgan');
 var mongoose        = require('mongoose');
 var cookieParser    = require('cookie-parser');
 var expressSession  = require('express-session');
@@ -19,7 +18,6 @@ app.io.set('transports', ['xhr-polling']);
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(morgan('dev'));
 
 app.use(flash());
 

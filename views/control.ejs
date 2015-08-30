@@ -1,0 +1,521 @@
+<% layout('layout'); -%>
+
+<div id="hmcontrol">
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Observatory</h3>
+        </div>
+        <div class="panel-body">
+
+            <div class="btn-group" role="group" aria-label="...">
+                <button class="btn btn-default" hm-device="Dach auf" id="dachAufButton">&Ouml;ffnen</button>
+                <button class="btn btn-default" hm-state="0" hm-group="Dach" id="stopButton">STOP</button>
+                <button class="btn btn-default" hm-device="Dach zu" id="dachZuButton">Schlie&szlig;en</button>
+            </div>
+
+            <br>
+
+            <div id="progress" style="padding: 25px;"></div>
+
+        </div>
+    </div>
+
+    <div class="panel panel-info">
+        <div class="panel-heading" data-toggle="collapse" data-target="#daniel">
+            <h3 class="panel-title">Left Control - Daniel</h3>
+        </div>
+        <div id="daniel" class="panel-collapse collapse in">
+            <div class="panel-body" >
+
+                <span class='toggleButton'>
+
+                        <button class="btn btn-default" hm-state="1" hm-group="GruppeA">Einschalten</button>
+                        <button class="btn btn-default" hm-state="0" hm-group="GruppeA">Ausschalten</button>
+
+                    &nbsp;&nbsp;&nbsp;
+
+                        <button class="btn btn-default" hm-device="Kanal 1.1">Computer</button>
+                        <button class="btn btn-default" hm-device="Kanal 1.2">Monitor</button>
+                        <button class="btn btn-default" hm-device="Kanal 1.3">Montierung</button>
+                        <button class="btn btn-default" hm-device="Kanal 1.4">Technik</button>
+
+                    &nbsp;&nbsp;&nbsp;
+
+                        <button class="btn btn-default" hm-url="push/short/PC Knopf Daniel">PC <small>short press</small></button>
+                        <button class="btn btn-default" hm-url="push/long/PC Knopf Daniel">PC <small>cold shutdown</small></button>
+
+                    <br><br>
+
+                        <button class="btn btn-default" api-left-url="starteqmod">EQMod starten</button>
+                        <button class="btn btn-default" api-left-url="unpark">Unpark</button>
+                        <button class="btn btn-default" api-left-url="phdstatus">PHD status</button>
+                        <button class="btn btn-default" api-left-url="startphd">PHD starten</button>
+                        <button class="btn btn-default" api-left-url="startguiding">PHD Guiding starten</button>
+                        <button class="btn btn-default" api-left-url="stopguiding">PHD Guiding stoppen</button>
+                        <button class="btn btn-default" api-left-url="stopphd">PHD beenden</button>
+                        <button class="btn btn-default" api-left-url="park">Parken</button>
+                        <button class="btn btn-default" api-left-url="stopeqmod">EQMod beenden</button>
+
+
+                    <div id="results_left">
+
+                    </div>
+
+                </span>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-warning">
+        <div class="panel-heading" data-toggle="collapse" data-target="#markus">
+            <h3 class="panel-title">Right Control - Markus</h3>
+        </div>
+        <div id="markus" class="panel-collapse collapse in">
+            <div class="panel-body">
+
+            <span class='toggleButton'>
+
+                    <button class="btn btn-default" hm-state="1" hm-group="GruppeB">Einschalten</button>
+                    <button class="btn btn-default" hm-state="0" hm-group="GruppeB">Ausschalten</button>
+
+                &nbsp;&nbsp;&nbsp;
+
+                    <button class="btn btn-default" hm-device="Kanal 2.1">Computer</button>
+                    <button class="btn btn-default" hm-device="Kanal 2.2">Monitor</button>
+                    <button class="btn btn-default" hm-device="Kanal 2.3">Montierung</button>
+                    <button class="btn btn-default" hm-device="Kanal 2.4">Technik</button>
+
+                &nbsp;&nbsp;&nbsp;
+
+                    <button class="btn btn-default" hm-url="push/short/PC Knopf Markus">PC <small>short press</small></button>
+                    <button class="btn btn-default" hm-url="push/long/PC Knopf Markus">PC <small>cold shutdown</small></button>
+
+
+                <div id="results_right">
+
+                </div>
+
+
+            </span>
+
+        </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+
+
+
+    io = io.connect();
+
+	var devices = <%-JSON.stringify(devices)%>;
+	var groups = <%-JSON.stringify(groups)%>;
+
+    // DACH VARIABLEN //
+
+    var progress_image = null;
+
+    var zeitwert_beginn = null;
+    var zeitwert_aktuell = 0;
+    var prozentwert = 0;
+
+    var stop = false;
+
+    var maximale_laufzeit = 57;
+    var anzahl_bilder = 37;
+    var letztes_bild = 1;
+
+    var max_width = 100;
+
+        // DACH VARIABLEN STOP
+
+    $(document).ready(function() {
+
+        max_width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+
+        var dachstatus = false;
+
+        for(var i=0; i <= devices.length-1; i++) {
+            if(devices[i].Name == "Status - Dach auf") {
+                if(devices[i].Value == false) {
+                    prozentwert = 100;
+                    dachstatus = true;
+                    break;
+                }
+            }
+            if(devices[i].Name == "Status - Dach zu") {
+                if(devices[i].Value == false) {
+                    prozentwert = 0;
+                    dachstatus = true;
+                    break;
+                }
+            }
+        }
+        if(!dachstatus) {
+            prozentwert = 50;
+        }
+
+        io.on('updateDevice', function(data) {
+            updateDevice(data.name, data.state);
+        });
+
+        updateAllDeviceButtons(devices);
+
+        $("button").each(function() {
+
+            var btn = $(this);
+            var hmDevice = btn.attr('hm-device');
+            var hmGroup = btn.attr('hm-group');
+            var hmState = btn.attr('hm-state');
+            var hmUrl = btn.attr('hm-url');
+            var apiLeftUrl = btn.attr('api-left-url');
+            var apiRightUrl = btn.attr('api-right-url');
+
+            if(hmDevice) {
+                $(this).click(function() {
+                    var text = btn.text();
+                    $(this).html("<img src='img/loader.gif' />");
+                    toggleWithAjax(hmDevice, function(result) {
+                        btn.text(text);
+                    });
+                });
+            }
+
+            if(hmGroup) {
+                $(this).click(function() {
+                    var text = btn.text();
+                    $(this).html("<img src='img/loader.gif' />");
+                    setGroupWithAjax(hmGroup, hmState, function(result) {
+                        updateAllDeviceButtons(result);
+                        btn.text(text);
+                    });
+                });
+            }
+
+            if(hmUrl) {
+                $(this).click(function() {
+                    var text = btn.text();
+                    $(this).html("<img src='img/loader.gif' />");
+                    loadHmUrlWithAjax(hmUrl, function(result) {
+                        btn.text(text);
+                    });
+                });
+            }
+
+            if(apiLeftUrl) {
+                $(this).click(function() {
+                    var text = btn.text();
+                    $(this).html("<img src='img/loader.gif' />");
+                    load_tmwLeftApiUrl(apiLeftUrl, function(result) {
+                        btn.text(text);
+                        $("#results_left").html(result);
+                    });
+                });
+            }
+
+            if(apiRightUrl) {
+                $(this).click(function() {
+                    var text = btn.text();
+                    $(this).html("<img src='img/loader.gif' />");
+                    load_tmwRightApiUrl(apiRightUrl, function(result) {
+                        btn.text(text);
+                        $("#results_right").html(result);
+                    });
+                });
+            }
+
+        });
+
+    });
+
+
+    function updateAllDeviceButtons(devicelist) {
+
+        var sperre_dach_zu = false;
+        var sperre_dach_auf = false;
+
+        $("button").each(function() {
+
+            var btn = $(this);
+            var hmDevice = btn.attr('hm-device');
+
+            for(var i=0; i <= devicelist.length-1; i++) {
+                if(hmDevice == devicelist[i].Name) {
+                    if(devicelist[i].Value == true && btn.hasClass('btn-default')) {
+                        btn.removeClass('btn-default');
+                        btn.addClass('btn-success');
+                        btn.effect("highlight");
+                    } else if(devicelist[i].Value == false && btn.hasClass('btn-success')) {
+                        btn.removeClass('btn-success');
+                        btn.addClass('btn-default');
+                        btn.effect("highlight");
+                    }
+
+                    if(devicelist[i].Name == "Dach auf" && devicelist[i].Value == true) {
+                        sperre_dach_zu = true;
+                    }
+                    if(devicelist[i].Name == "Dach zu" && devicelist[i].Value == true) {
+                        sperre_dach_auf = true;
+                    }
+
+                }
+            }
+
+        });
+
+        if(sperre_dach_auf) {
+            $("#dachAufButton").prop( "disabled", true );
+            $("#dachZuButton").prop( "disabled", false );
+        } else if(sperre_dach_zu) {
+            $("#dachAufButton").prop( "disabled", false );
+            $("#dachZuButton").prop( "disabled", true );
+        } else {
+            $("#dachAufButton").prop( "disabled", false );
+            $("#dachZuButton").prop( "disabled", false );
+        }
+
+    }
+
+    function updateDevice(buttonName, value) {
+
+        console.log("Got Device Update", buttonName, value);
+
+        var sperre_dach_zu = false;
+        var sperre_dach_auf = false;
+
+        $("button").each(function() {
+
+            var btn = $(this);
+            var hmDevice = btn.attr('hm-device');
+
+            if(buttonName == hmDevice) {
+
+                if(value == true && btn.hasClass('btn-default')) {
+                    btn.removeClass('btn-default');
+                    btn.addClass('btn-success');
+                    btn.effect("highlight");
+                } else if(value == false && btn.hasClass('btn-success')) {
+                    btn.removeClass('btn-success');
+                    btn.addClass('btn-default');
+                    btn.effect("highlight");
+                }
+
+            }
+
+        });
+
+        if(buttonName == "Dach auf" || buttonName == "Dach zu") {
+
+            if (buttonName == "Dach auf" && value == true) {
+                sperre_dach_zu = true;
+                startOpenRoof();
+            }
+            if (buttonName == "Dach zu" && value == true) {
+                sperre_dach_auf = true;
+                startCloseRoof();
+            }
+            if(sperre_dach_auf) {
+                $("#dachAufButton").prop( "disabled", true );
+                $("#dachZuButton").prop( "disabled", false );
+            } else if(sperre_dach_zu) {
+                $("#dachAufButton").prop( "disabled", false );
+                $("#dachZuButton").prop( "disabled", true );
+            } else {
+                //stop();
+                $("#dachAufButton").prop( "disabled", false );
+                $("#dachZuButton").prop( "disabled", false );
+            }
+        }
+
+    }
+
+    function updateList(name, value) {
+        for(var i=0; i <= devices.length-1; i++) {
+            if(name == devices[i].Name) {
+                devices[i].Value = value;
+            }
+        }
+    }
+
+    function toggleWithAjax(hmDevice, callback) {
+
+        $.ajax({
+            url: "api/toggle/" + hmDevice,
+            cache: false
+        }).done(function() {
+            if(callback) callback();
+        });
+
+    }
+
+    function setGroupWithAjax(hmGroup, state, callback) {
+
+        $.ajax({
+            url: "api/set/g/" + hmGroup + "/" + state,
+            cache: false
+        }).done(function() {
+
+            $.ajax({
+                url: "api/get/devices",
+                cache: false
+            }).done(function(result) {
+                callback(result);
+            });
+
+        });
+
+    }
+
+    function updateDeviceList(callback) {
+        $.ajax({
+            url: "api/get/devices/update",
+            cache: false
+        }).done(function(result) {
+            devices = result;
+            if(callback) callback(result);
+        });
+    }
+
+    function loadHmUrlWithAjax(url, callback) {
+        $.ajax({
+            url: "api/" + url,
+            cache: false
+        }).done(function(result) {
+            devices = result;
+            if(callback) callback(result);
+        });
+    }
+
+    function load_tmwLeftApiUrl(url, callback) {
+        $.ajax({
+            url: "api/tmwLeftAPI/" + url
+        }).done(function(result) {
+            if(callback) callback(result);
+        });
+    }
+
+    function load_tmwRightApiUrl(url, callback) {
+        $.ajax({
+            url: "api/tmwRightAPI/" + url
+        }).done(function(result) {
+            if(callback) callback(result);
+        });
+    }
+
+
+
+    ///// DACH ///////////////////////
+    ///// DACH ///////////////////////
+    ///// DACH ///////////////////////
+    ///// DACH ///////////////////////
+
+    $(document).ready(function() {
+        initRoof();
+        setRoof(prozentwert);
+    });
+
+    function stopRoof() {
+        stop= true;
+    }
+
+    /**
+     * Dach öffnen starten.
+     */
+    function startOpenRoof(callback) {
+        if(prozentwert > 0 && prozentwert < 100) {
+            zeitwert_beginn = new Date().getTime() - zeitwert_aktuell * 1000;
+        } else {
+            zeitwert_beginn = new Date().getTime();
+        }
+        stop = false;
+        openRoof(callback);
+    }
+
+    /**
+     * Dach schließen starten.
+     */
+    function startCloseRoof(callback) {
+        if(prozentwert > 0 && prozentwert < 100) {
+            zeitwert_beginn = new Date().getTime() - (maximale_laufzeit-zeitwert_aktuell) * 1000;
+        } else {
+            zeitwert_beginn = new Date().getTime();
+        }
+        stop = false;
+        closeRoof(callback);
+    }
+
+    function initRoof() {
+        console.log(max_width);
+        progress_image = $("<img/>").attr('src', "img/sternwarte_progress/" + getImage(prozentwert) + '.jpg').css('max-width', max_width-100);
+        $("#progress").append(progress_image);
+    }
+
+    /**
+     * Initialisiert die Anzeige anhand eines Prozentwertes.
+     * @param prozent
+     */
+    function setRoof(prozent) {
+        prozentwert = prozent;
+        zeitwert_aktuell = 0.57 * prozent;
+        progress_image.attr('src', "img/sternwarte_progress/" + getImage(prozent) + '.jpg');
+    }
+
+    /**
+     * Öffnende Dachanimation.
+     * @param callback
+     */
+    function openRoof(callback) {
+
+        setTimeout(function() {
+            zeitwert_aktuell = ((new Date().getTime() - zeitwert_beginn)/1000);
+            prozentwert = ( ((new Date().getTime() - zeitwert_beginn)/1000) * 100 / maximale_laufzeit );
+            progress_image.attr('src', "img/sternwarte_progress/" + getImage(prozentwert) + ".jpg");
+            if(prozentwert < 100 && !stop) {
+                openRoof();
+            } else {
+                if(callback) callback();
+            }
+        }, 200);
+    }
+
+    /**
+     * Schließende Dachanimation.
+     * @param callback
+     */
+    function closeRoof(callback) {
+        setTimeout(function() {
+            zeitwert_aktuell = maximale_laufzeit - ((new Date().getTime() - zeitwert_beginn)/1000);
+            var zeit = zeitwert_beginn - new Date().getTime();
+            prozentwert = 100 - (-1* ( (zeit / 1000) * 100 / maximale_laufzeit ));
+            progress_image.attr('src', "img/sternwarte_progress/" + getImage(prozentwert) + ".jpg");
+            if(prozentwert > 0 && !stop) {
+                closeRoof(callback);
+            } else {
+                if(callback) callback();
+            }
+        }, 200);
+    }
+
+    /**
+     * Berechnet das anzuzeigende Bild.
+     * @param prozent
+     * @returns {number}
+     */
+    function getImage(prozent) {
+        var image = Math.round(anzahl_bilder / 100 * prozent);
+        if(image > 0 && image <= anzahl_bilder) {
+            letztes_bild = image;
+            return image;
+        } else {
+            return letztes_bild;
+        }
+    }
+
+
+
+</script>
