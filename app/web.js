@@ -85,6 +85,7 @@ var web = {
         var kategorie = req.body.Kategorie;
         var dachauf = (req.body.DachAuf == "true");
         var dachzu = (req.body.DachZu == "true");
+        var endlagedachzu = (req.body.EndlageDachZu == "true");
 
         hm.findDeviceByAddress(address, function(device) {
             if(device) {
@@ -92,6 +93,7 @@ var web = {
                 device.Kategorie = kategorie;
                 device.DachAuf = dachauf;
                 device.DachZu = dachzu;
+                device.EndlageDachZu = endlagedachzu;
                 device.save();
                 req.flash('success', "Device aktualisiert.");
                 return res.redirect('/devices');
@@ -108,7 +110,8 @@ var web = {
                             Type: type,
                             Name: name,
                             DachAuf: dachauf,
-                            DachZu: dachzu
+                            DachZu: dachzu,
+                            EndlageDachZu: endlagedachzu
                         });
 
                         dev.save(function (err) {

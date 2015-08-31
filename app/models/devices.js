@@ -12,5 +12,6 @@ module.exports = mongoose.model('Datapoint', new Schema({
     Kategorie: String,
     Position: Number,
     DachAuf: Boolean,
-    DachZu: Boolean
+    DachZu: Boolean,
+    EndlageDachZu: Boolean
 }));
