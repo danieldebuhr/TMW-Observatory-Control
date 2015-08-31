@@ -94,7 +94,7 @@
 
                 if (devices[addr].State == "false") {
                     button.html(button.text() + "<img src='img/door-open.png' />");
-                    if(devices[addr].DachZu == "true") {
+                    if(devices[addr].Name == "Dach zu") {
                         button.addClass('btn-success');
                     } else {
                         button.addClass('btn-warning');
@@ -165,7 +165,7 @@
                 button.removeClass('btn-success');
                 button.removeClass('btn-warning');
                 button.html(button.attr('original-name') + " <img src='img/door-open.png' />");
-                if(data.service.DachZu == "true") {
+                if(data.device.Name == "Dach zu") {
                     button.addClass('btn-success');
                 } else {
                     button.addClass('btn-warning');
