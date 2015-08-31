@@ -90,19 +90,17 @@
             if(devices[addr].Type == "SHUTTER_CONTACT") {
 
                 var button = $("<button/>").attr('address', addr).addClass('btn').text(devices[addr].Name).attr('original-name', devices[addr].Name);
-
+                button.prop("disabled", true);
 
                 if (devices[addr].State == "false") {
-                    button.prop("disabled", true);
                     button.html(button.text() + "<img src='img/door-open.png' />");
-                    if(devices[addr].DachZu) {
+                    if(devices[addr].DachZu == "true") {
                         button.addClass('btn-success');
                     } else {
                         button.addClass('btn-warning');
                     }
                 } else {
                     button.addClass('btn-default');
-                    button.prop("disabled", true);
                     button.html(button.text() + "<img src='img/door-close.png' />");
                 }
 
@@ -167,7 +165,7 @@
                 button.removeClass('btn-success');
                 button.removeClass('btn-warning');
                 button.html(button.attr('original-name') + " <img src='img/door-open.png' />");
-                if(data.service.DachZu) {
+                if(data.service.DachZu == "true") {
                     button.addClass('btn-success');
                 } else {
                     button.addClass('btn-warning');
