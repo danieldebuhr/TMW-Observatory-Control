@@ -93,9 +93,13 @@
 
 
                 if (devices[addr].State == "false") {
-                    button.addClass('btn-shutter');
                     button.prop("disabled", true);
                     button.html(button.text() + "<img src='img/door-open.png' />");
+                    if(data.service.DachZu) {
+                        button.addClass('btn-success');
+                    } else {
+                        button.addClass('btn-warning');
+                    }
                 } else {
                     button.addClass('btn-default');
                     button.prop("disabled", true);
@@ -157,17 +161,24 @@
         }
 
         if(data.device.Type == "SHUTTER_CONTACT") {
-            console.log(data.device);
+
             var button = $("button[address='" + data.device.Address + "']");
             if (data.device.State == "false") {
-                button.addClass('btn-shutter');
-                button.removeClass('btn-default');
+                button.removeClass('btn-success');
+                button.removeClass('btn-warning');
                 button.html(button.attr('original-name') + " <img src='img/door-open.png' />");
+                if(data.service.DachZu) {
+                    button.addClass('btn-success');
+                } else {
+                    button.addClass('btn-warning');
+                }
             } else {
                 button.addClass('btn-default');
-                button.removeClass('btn-shutter');
+                button.removeClass('btn-success');
+                button.removeClass('btn-warning');
                 button.html(button.attr('original-name') + " <img src='img/door-close.png' />");
             }
+
 
         }
 
