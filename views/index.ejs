@@ -45,6 +45,12 @@
         font-family: Consolas, Menlo, Monaco, monospace;
         padding: 10px;
     }
+    .button-group {
+        display: inline-block;
+        margin-left: 10px;
+        margin-right: 10px;
+        padding: 5px;
+    }
 </style>
 
 <script>
@@ -78,10 +84,7 @@
                             .addClass('form-group')
                             .addClass('form-inline')
                             .addClass('alert alert-info')
-                            .css('display', 'inline-block')
-                            .css('margin-left', '10px')
-                            .css('margin-right', '10px')
-                            .css('padding', '5px');
+                            .addClass('button-group');
 
                     var apiinput = $("<input/>")
                             .attr('original-name', apilinks[id].InputField)
@@ -98,10 +101,7 @@
                             .addClass('form-group')
                             .addClass('form-inline')
                             .addClass('alert alert-info')
-                            .css('display', 'inline-block')
-                            .css('margin-left', '10px')
-                            .css('margin-right', '10px')
-                            .css('padding', '5px');
+                            .addClass('button-group');
                     var gotoinput = $("<input/>")
                             .attr('original-name', apilinks[id].Name)
                             .attr('id', "goto_" + id)

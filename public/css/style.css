@@ -15,13 +15,22 @@
 
 @media only screen and (max-device-width: 1023px) {
 
-    .toggleButton {
-
-        display: block;
-    }
-
-    .toggleButton button {
+    .form-group, button {
         width: 100%;
+    }
+    .form-control {
+        display: inline-block !important;
+    }
+    .button-group {
+        text-align: center;
+        margin-left: 0px !important;
+        margin-right: 0px !important;
+        margin-top: 10px;
+    }
+    .button-group input {
+        width: 100% !important;
+    }
+    .panel-body button {
         margin-bottom: 10px;
     }
 
