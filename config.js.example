@@ -9,6 +9,9 @@ module.exports = {
     homematic_rpclistenip : "192.168.0.20,
     homematic_rpc_id: "hm2observatory",
 
+    goto_ngc_api: "http://www.themilkyway.de/ngc_api.php?ngc=",
+
+
     GOOGLE_CLIENT_ID: "12345-abcdef.apps.googleusercontent.com",
     GOOGLE_CLIENT_SECRET: "abcDEF",
     GOOGLE_CALLBACK: "http://mywebpage/auth/google/callback"

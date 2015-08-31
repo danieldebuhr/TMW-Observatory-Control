@@ -57,9 +57,9 @@ var web = {
                 for (var i = 0; i <= devices.length - 1; i++) {
                     devicelist[devices[i].Address] = devices[i];
                 }
-                res.render('devices', { user: req.user, page: "bearbeiten", devices: devicelist, success: req.flash('success'), error: req.flash('error')});
+                res.render('devices', { user: req.user, page: "devices", devices: devicelist, success: req.flash('success'), error: req.flash('error')});
             } else {
-                res.render('devices', { user: req.user, page: "bearbeiten", devices: {}, success: req.flash('success'), error: req.flash('error')});
+                res.render('devices', { user: req.user, page: "devices", devices: {}, success: req.flash('success'), error: req.flash('error')});
             }
         });
 
@@ -109,12 +109,16 @@ var web = {
         var name = req.body.Name;
         var url = req.body.URL;
         var kategorie = req.body.Kategorie;
+        var inputfield = req.body.InputField;
+        var gotoapi = req.body.GotoAPI;
 
         apilink.findById(id, function(err, found_apilink) {
             if(found_apilink) {
                 found_apilink.Name = name;
                 found_apilink.URL = url;
                 found_apilink.Kategorie = kategorie;
+                found_apilink.InputField = inputfield;
+                found_apilink.GotoAPI = gotoapi;
                 found_apilink.save();
                 req.flash('success', "APILink aktualisiert.");
                 return res.redirect('/apilinks');
@@ -123,15 +127,17 @@ var web = {
                 var alink = new apilink({
                     Name: name,
                     URL: url,
-                    Kategorie: kategorie
+                    Kategorie: kategorie,
+                    InputField: inputfield,
+                    GotoAPI: gotoapi
                 });
 
                 alink.save(function (err) {
                     if (err) {
-                        req.flash('error', "Konnte den APILink nicht hinzufügen. Fehler in der Datenbank.");
+                        req.flash('error', "Konnte den APILink nicht hinzuf%uuml;gen. Fehler in der Datenbank.");
                         return res.redirect('/apilinks');
                     } else {
-                        req.flash('success', "Neuer APILink hinzugefügt.");
+                        req.flash('success', "Neuer APILink hinzugef&uuml;gt.");
                         return res.redirect('/apilinks');
                     }
                 });
@@ -178,7 +184,7 @@ var web = {
             } else {
                 hm.getType(address, function(type) {
                     if(!type) {
-                        req.flash('error', "Konnte das Device nicht hinzufügen. Adresse korrekt?");
+                        req.flash('error', "Konnte das Device nicht hinzuf&uuml;gen. Adresse korrekt?");
                         return res.redirect('/devices');
                     } else {
 
@@ -194,10 +200,10 @@ var web = {
 
                         dev.save(function (err) {
                             if (err) {
-                                req.flash('error', "Konnte das Device nicht hinzufügen. Fehler in der Datenbank.");
+                                req.flash('error', "Konnte das Device nicht hinzuf&uuml;gen. Fehler in der Datenbank.");
                                 return res.redirect('/devices');
                             } else {
-                                req.flash('success', "Neues Device hinzugefügt.");
+                                req.flash('success', "Neues Device hinzugef&uuml;gt.");
                                 return res.redirect('/devices');
                             }
                         });

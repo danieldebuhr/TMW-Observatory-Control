@@ -66,18 +66,72 @@
 
         for(var id in apilinks) {
 
+            kat = createKategory(apilinks[id].Kategorie);
+
             var apibutton = $("<button/>");
             apibutton.addClass('btn').addClass('btn-apilink');
 
-            kat = createKategory(apilinks[id].Kategorie);
+            if(typeof apilinks[id].InputField != "undefined") {
+                if(apilinks[id].InputField != "") {
+
+                    var apiinputgroup = $("<div/>")
+                            .addClass('form-group')
+                            .addClass('form-inline')
+                            .addClass('alert alert-info')
+                            .css('display', 'inline-block')
+                            .css('margin-left', '10px')
+                            .css('margin-right', '10px')
+                            .css('padding', '5px');
+
+                    var apiinput = $("<input/>")
+                            .attr('original-name', apilinks[id].InputField)
+                            .attr('id', "input_" + id)
+                            .attr('placeholder', apilinks[id].InputField)
+                            .addClass('form-control')
+                            .css('width', '60');
+                }
+            }
+
+            if(typeof apilinks[id].GotoAPI != "undefined") {
+                if(apilinks[id].GotoAPI == true) {
+                    var gotogroup = $("<div/>")
+                            .addClass('form-group')
+                            .addClass('form-inline')
+                            .addClass('alert alert-info')
+                            .css('display', 'inline-block')
+                            .css('margin-left', '10px')
+                            .css('margin-right', '10px')
+                            .css('padding', '5px');
+                    var gotoinput = $("<input/>")
+                            .attr('original-name', apilinks[id].Name)
+                            .attr('id', "goto_" + id)
+                            .attr('placeholder', "2244")
+                            .addClass('form-control')
+                            .css('width', '60');
+                    var gotolabel = $("<label/>").attr('for', "goto_" + id).html("NGC&nbsp;&nbsp;");
+                }
+            }
 
             apibutton.text(apilinks[id].Name).attr('id', id);
             apibutton.click(function() {
                 var btn = $(this);
                 var text = btn.text();
                 btn.html("<img src='img/loader.gif' />");
+
+                var inputfield = $("#input_" + btn.attr('id'));
+                var gotofield = $("#goto_" + btn.attr('id'));
+
+                post_data = {};
+                if(inputfield.length) {
+                    post_data[inputfield.attr('original-name')] = inputfield.val();
+                }
+                if(gotofield.length) {
+                    post_data['goto'] = gotofield.val();
+                }
                 $.ajax({
-                    url: "api/apilink/" + $(this).attr('id')
+                    type: 'POST',
+                    url: "api/apilink/" + $(this).attr('id'),
+                    data: post_data
                 }).done(function(result) {
                     btn.text(text);
                     info.html(result);
@@ -85,7 +139,22 @@
                 });
             });
 
-            kategorien[kat].append(apibutton);
+            if(apiinputgroup)  {
+                apiinputgroup.append(apiinput);
+                apiinputgroup.append(apibutton);
+                kategorien[kat].append(apiinputgroup);
+            } else if(gotogroup) {
+                gotogroup.append(gotolabel);
+                gotogroup.append(gotoinput);
+                gotogroup.append(apibutton);
+                kategorien[kat].append(gotogroup);
+            } else {
+                kategorien[kat].append(apibutton);
+            }
+
+
+            apiinputgroup = null;
+            gotogroup = null;
 
         }
 

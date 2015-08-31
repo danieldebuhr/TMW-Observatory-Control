@@ -6,5 +6,7 @@ var Schema = mongoose.Schema;
 module.exports = mongoose.model('APILink', new Schema({
     Name: String,
     URL: String,
-    Kategorie: String
+    Kategorie: String,
+    InputField: String,
+    GotoAPI: Boolean
 }));

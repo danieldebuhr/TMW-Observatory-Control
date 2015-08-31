@@ -1,5 +1,6 @@
 var hm              = require('./homematic');
 var apilink         = require('./models/apilink');
+var config          = require('./../config');
 var request         = require('request');
 
 var api = {
@@ -156,16 +157,37 @@ var api = {
         var cmd = "";
         if(req.params.cmd) cmd = "/" + req.params.cmd;
 
-        request(req.apilink.URL + cmd, function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                console.log(body);
-                res.send(body);
-            } else {
-                console.log(error);
-                res.send(error);
-            }
+        if(req.apilink.GotoAPI == true) {
 
-        })
+            console.log(req.body);
+
+            getNGC(req.body.goto, function(result) {
+                console.log(result);
+                if(result) {
+                    request(req.apilink.URL + "/" + result, function (error, response, body) {
+                        if (!error && response.statusCode == 200) {
+                            res.send(body);
+                        } else {
+                            res.send(error);
+                        }
+                    });
+                } else {
+                    res.send("NGC " + req.body.goto + " nicht gefunden.");
+                }
+            })
+
+        } else {
+
+            request(req.apilink.URL + cmd, function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    res.send(body);
+                } else {
+                    res.send(error);
+                }
+
+            });
+
+        }
 
     }
 
@@ -173,3 +195,17 @@ var api = {
 
 module.exports = api;
 
+function getNGC(ngc_number, callback) {
+
+    var url = config.goto_ngc_api + ngc_number;
+
+    request(url, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            callback(body);
+        } else {
+            callback(false);
+        }
+
+    })
+
+}

@@ -31,8 +31,8 @@ router.get('/api/device/:addr', api.getDeviceState);
 /**
  * API-Link Funktionalität.
  */
-router.get('/api/apilink/:apilinkid', api.apiLink);
-router.get('/api/apilink/:apilinkid/:cmd', api.apiLink);
+router.post('/api/apilink/:apilinkid', api.apiLink);
+router.post('/api/apilink/:apilinkid/:cmd', api.apiLink);
 
 /**
  * Routen für die Benutzerverwaltung.
