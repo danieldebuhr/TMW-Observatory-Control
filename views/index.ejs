@@ -95,7 +95,7 @@
                 if (devices[addr].State == "false") {
                     button.prop("disabled", true);
                     button.html(button.text() + "<img src='img/door-open.png' />");
-                    if(data.service.DachZu) {
+                    if(devices[addr].DachZu) {
                         button.addClass('btn-success');
                     } else {
                         button.addClass('btn-warning');
