@@ -19,6 +19,7 @@ router.get('/api', function(req, res) {
 
 router.param('addr', api.validateDevice);
 router.param('state', api.validateState);
+router.param('apilinkid', api.validateApiLink);
 
 /**
  * Routen für Device-State
@@ -26,6 +27,12 @@ router.param('state', api.validateState);
 router.get('/api/device/:addr/state/:state', api.setDeviceState);
 router.get('/api/device/:addr/toggle', api.toggleDeviceState);
 router.get('/api/device/:addr', api.getDeviceState);
+
+/**
+ * API-Link Funktionalität.
+ */
+router.get('/api/apilink/:apilinkid', api.apiLink);
+router.get('/api/apilink/:apilinkid/:cmd', api.apiLink);
 
 /**
  * Routen für die Benutzerverwaltung.
@@ -45,6 +52,9 @@ router.get('/account', web.account);
 router.get('/devices', web.page_devices);
 router.post('/deviceManager', web.deviceManagerPost);
 router.get('/deleteDevice/:addr', web.deleteDevice);
+router.get('/apilinks', web.page_apilink);
+router.post('/apilinkManager', web.apilinkManagerPost);
+router.get('/deleteApilink/:apilinkid', web.deleteApilink);
 
 module.exports = router;
 

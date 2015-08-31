@@ -1,4 +1,6 @@
 var hm              = require('./homematic');
+var apilink         = require('./models/apilink');
+var request         = require('request');
 
 var api = {
 
@@ -36,6 +38,20 @@ var api = {
             res.status(500);
             res.json({success: false, message: state + ' wird nicht akzeptiert.'});
         }
+
+    },
+
+    validateApiLink: function(req, res, next, apilinkid) {
+
+        apilink.findById(apilinkid, function(err, apilink) {
+            if(apilink) {
+                req.apilink = apilink;
+                next();
+            } else {
+                res.status(404);
+                res.json({success: false, message: apilink + " nicht gefunden"});
+            }
+        });
 
     },
 
@@ -132,6 +148,24 @@ var api = {
         User.find({}, function(err, user) {
             res.json({success: true, users: user});
         });
+
+    },
+
+    apiLink: function(req, res) {
+
+        var cmd = "";
+        if(req.params.cmd) cmd = "/" + req.params.cmd;
+
+        request(req.apilink.URL + cmd, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                console.log(body);
+                res.send(body);
+            } else {
+                console.log(error);
+                res.send(error);
+            }
+
+        })
 
     }
 

@@ -1,4 +1,5 @@
 var devices         = require('./models/devices');
+var apilink         = require('./models/apilink');
 var hm              = require('./homematic');
 
 var web = {
@@ -6,15 +7,17 @@ var web = {
     page_index: function(req, res) {
 
         devices.find({}, function(err, devices) {
-            if(devices) {
-                devicelist = {};
-                for (var i = 0; i <= devices.length - 1; i++) {
-                    devicelist[devices[i].Address] = devices[i];
-                }
-                res.render('index', {page: 'index', user: req.user, devices: devicelist});
-            } else {
-                res.render('index', {page: 'index', user: req.user, devices: {}});
+            devicelist = {};
+            for (var i = 0; i <= devices.length - 1; i++) {
+                devicelist[devices[i].Address] = devices[i];
             }
+            apilink.find({}, function(err, apilinks) {
+                apilinklist = {};
+                for (var i = 0; i <= apilinks.length - 1; i++) {
+                    apilinklist[apilinks[i]._id] = apilinks[i];
+                }
+                res.render('index', {page: 'index', user: req.user, devices: devicelist, apilinks: apilinklist});
+            });
         });
 
     },
@@ -57,6 +60,81 @@ var web = {
                 res.render('devices', { user: req.user, page: "bearbeiten", devices: devicelist, success: req.flash('success'), error: req.flash('error')});
             } else {
                 res.render('devices', { user: req.user, page: "bearbeiten", devices: {}, success: req.flash('success'), error: req.flash('error')});
+            }
+        });
+
+    },
+
+    /**
+     * Bearbeiten von ApiLinks.
+     * @param req
+     * @param res
+     */
+    page_apilink: function(req, res) {
+        apilink.find({}, function(err, apilinks) {
+            apilinklist = {};
+            for (var i = 0; i <= apilinks.length - 1; i++) {
+                apilinklist[apilinks[i]._id] = apilinks[i];
+            }
+            res.render('apilink', { user: req.user, page: "apilink", apilinks: apilinklist, success: req.flash('success'), error: req.flash('error')});
+        });
+    },
+
+    /**
+     * Löschen von APILinks.
+     * @param req
+     * @param res
+     */
+    deleteApilink: function(req, res) {
+        apilink.findById(req.params.apilinkid, function(err, found_apilink) {
+            if(found_apilink) {
+                found_apilink.remove();
+                req.flash('success', "APILink gel&ouml;scht.");
+                return res.redirect('/apilinks');
+            } else {
+                req.flash('error', "APILink nicht gefunden.");
+                return res.redirect('/apilinks');
+            }
+        });
+    },
+
+    /**
+     * Hinzufügen von neuen APILinks.
+     * @param req
+     * @param res
+     */
+    apilinkManagerPost: function(req, res) {
+
+        var id = req.body.id;
+        var name = req.body.Name;
+        var url = req.body.URL;
+        var kategorie = req.body.Kategorie;
+
+        apilink.findById(id, function(err, found_apilink) {
+            if(found_apilink) {
+                found_apilink.Name = name;
+                found_apilink.URL = url;
+                found_apilink.Kategorie = kategorie;
+                found_apilink.save();
+                req.flash('success', "APILink aktualisiert.");
+                return res.redirect('/apilinks');
+            } else {
+
+                var alink = new apilink({
+                    Name: name,
+                    URL: url,
+                    Kategorie: kategorie
+                });
+
+                alink.save(function (err) {
+                    if (err) {
+                        req.flash('error', "Konnte den APILink nicht hinzufügen. Fehler in der Datenbank.");
+                        return res.redirect('/apilinks');
+                    } else {
+                        req.flash('success', "Neuer APILink hinzugefügt.");
+                        return res.redirect('/apilinks');
+                    }
+                });
             }
         });
 

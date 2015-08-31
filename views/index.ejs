@@ -1,8 +1,22 @@
 <% layout('layout'); -%>
 
-<div id="info"></div>
+<div class="container-fluid" id="content">
 
-<div class="container-fluid" id="content"></div>
+</div>
+
+<div class="container-fluid" id="content">
+
+    <div class="panel panel-warning" id="infopanel" style="display: none;">
+        <div class="panel-heading">
+            <h3 class="panel-title">Info</h3>
+        </div>
+        <div class="panel-body" id="info">
+
+        </div>
+    </div>
+
+</div>
+
 
 <style>
     button {
@@ -11,100 +25,120 @@
     button img {
         padding-left: 10px;
     }
-    .btn-shutter {
-        background-color: hsl(329, 48%, 78%) !important;
+    .btn-apilink {
+        background-color: hsl(94, 47%, 85%) !important;
         background-repeat: repeat-x;
-        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#eccadb", endColorstr="#e1abc7");
-        background-image: -khtml-gradient(linear, left top, left bottom, from(#eccadb), to(#e1abc7));
-        background-image: -moz-linear-gradient(top, #eccadb, #e1abc7);
-        background-image: -ms-linear-gradient(top, #eccadb, #e1abc7);
-        background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eccadb), color-stop(100%, #e1abc7));
-        background-image: -webkit-linear-gradient(top, #eccadb, #e1abc7);
-        background-image: -o-linear-gradient(top, #eccadb, #e1abc7);
-        background-image: linear-gradient(#eccadb, #e1abc7);
-        border-color: #e1abc7 #e1abc7 hsl(329, 48%, 76%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#fcfdfb", endColorstr="#d6eac6");
+        background-image: -khtml-gradient(linear, left top, left bottom, from(#fcfdfb), to(#d6eac6));
+        background-image: -moz-linear-gradient(top, #fcfdfb, #d6eac6);
+        background-image: -ms-linear-gradient(top, #fcfdfb, #d6eac6);
+        background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fcfdfb), color-stop(100%, #d6eac6));
+        background-image: -webkit-linear-gradient(top, #fcfdfb, #d6eac6);
+        background-image: -o-linear-gradient(top, #fcfdfb, #d6eac6);
+        background-image: linear-gradient(#fcfdfb, #d6eac6);
+        border-color: #d6eac6 #d6eac6 hsl(94, 47%, 81.5%);
         color: #333 !important;
-        text-shadow: 0 1px 1px rgba(255, 255, 255, 0.13);
+        text-shadow: 0 1px 1px rgba(255, 255, 255, 0.23);
         -webkit-font-smoothing: antialiased;
+    }
+    #info {
+        font-family: Consolas, Menlo, Monaco, monospace;
+        padding: 10px;
     }
 </style>
 
 <script>
 
     var devices = <%-JSON.stringify(devices)%>;
+    var apilinks = <%-JSON.stringify(apilinks)%>;
+
+    console.log(apilinks);
 
     var dachAufAktiv = null;
     var dachZuAktiv = null;
 
+    var kategorien = {};
+
     $(document).ready(function() {
 
-        var kategorien = {};
+        var info = $("#info");
+        var kat = "";
 
-        for(addr in devices) {
+        for(var id in apilinks) {
 
+            var apibutton = $("<button/>");
+            apibutton.addClass('btn').addClass('btn-apilink');
 
-            if (typeof devices[addr].Kategorie == "undefined") {
-                devices[addr].Kategorie = "Allgemein";
-            }
-            if(devices[addr].Kategorie == "") {
-                devices[addr].Kategorie = "Allgemein";
-            }
-            if (!kategorien[devices[addr].Kategorie]) {
+            kat = createKategory(apilinks[id].Kategorie);
 
-                var p1 = $("<div/>").addClass('panel').addClass('panel-primary');
-                var p1_p1 = $("<div/>").addClass('panel-heading');
-                var p1_p1_h3 = $("<h3/>").addClass('panel-title').text(devices[addr].Kategorie);
-                kategorien[devices[addr].Kategorie] = $("<div/>").addClass('panel-body');
-                p1_p1.append(p1_p1_h3);
-                p1.append(p1_p1);
-                p1.append(kategorien[devices[addr].Kategorie]);
-                $("#content").append(p1);
-            }
+            apibutton.text(apilinks[id].Name).attr('id', id);
+            apibutton.click(function() {
+                var btn = $(this);
+                var text = btn.text();
+                btn.html("<img src='img/loader.gif' />");
+                $.ajax({
+                    url: "api/apilink/" + $(this).attr('id')
+                }).done(function(result) {
+                    btn.text(text);
+                    info.html(result);
+                    $("#infopanel").show().effect('highlight');
+                });
+            });
+
+            kategorien[kat].append(apibutton);
+
+        }
+
+        for(var addr in devices) {
+
+            var devicebutton = $("<button/>");
+
+            kat = createKategory(devices[addr].Kategorie);
 
             if (devices[addr].Type == "SWITCH") {
 
-                var button = $("<button/>").attr('address', addr).addClass('btn').text(devices[addr].Name);
+                devicebutton.attr('address', addr).addClass('btn').text(devices[addr].Name);
 
                 if(devices[addr].DachAuf) {
-                    button.attr('dachauf', 'true');
+                    devicebutton.attr('dachauf', 'true');
                     if(devices[addr].State == "true") dachAufAktiv = true;
                 } else if(devices[addr].DachZu) {
-                    button.attr('dachzu', 'true');
+                    devicebutton.attr('dachzu', 'true');
                     if(devices[addr].State == "true") dachZuAktiv = true;
                 }
 
                 if (devices[addr].State == "true") {
-                    button.addClass('btn-success');
+                    devicebutton.addClass('btn-success');
                 } else {
-                    button.addClass('btn-default');
+                    devicebutton.addClass('btn-default');
                 }
-                button.click(function() {
+                devicebutton.click(function() {
                     var dev = devices[$(this).attr("address")];
                     io.emit('toggle', dev);
                 });
 
-                kategorien[devices[addr].Kategorie].append(button);
+                kategorien[kat].append(devicebutton);
 
             }
 
             if(devices[addr].Type == "SHUTTER_CONTACT") {
 
-                var button = $("<button/>").attr('address', addr).addClass('btn').text(devices[addr].Name).attr('original-name', devices[addr].Name);
-                button.prop("disabled", true);
+                devicebutton.attr('address', addr).addClass('btn').text(devices[addr].Name).attr('original-name', devices[addr].Name);
+                devicebutton.prop("disabled", true);
 
                 if (devices[addr].State == "false") {
-                    button.html(button.text() + "<img src='img/door-open.png' />");
+                    devicebutton.html(devicebutton.text() + "<img src='img/door-open.png' />");
                     if(devices[addr].EndlageDachZu) {
-                        button.addClass('btn-success');
+                        devicebutton.addClass('btn-success');
                     } else {
-                        button.addClass('btn-warning');
+                        devicebutton.addClass('btn-warning');
                     }
                 } else {
-                    button.addClass('btn-default');
-                    button.html(button.text() + "<img src='img/door-close.png' />");
+                    devicebutton.addClass('btn-default');
+                    devicebutton.html(devicebutton.text() + "<img src='img/door-close.png' />");
                 }
 
-                kategorien[devices[addr].Kategorie].append(button);
+                kategorien[kat].append(devicebutton);
 
             }
 
@@ -177,10 +211,33 @@
                 button.html(button.attr('original-name') + " <img src='img/door-close.png' />");
             }
 
-
         }
 
         console.log(data.device);
-    })
+    });
+
+    function createKategory(katName) {
+
+        if (typeof katName == "undefined") {
+            katName = "Allgemein";
+        }
+        if(katName == "") {
+            katName = "Allgemein";
+        }
+
+        if (!kategorien[katName]) {
+            var p1 = $("<div/>").addClass('panel').addClass('panel-primary');
+            var p1_p1 = $("<div/>").addClass('panel-heading');
+            var p1_p1_h3 = $("<h3/>").addClass('panel-title').text(katName);
+            kategorien[katName] = $("<div/>").addClass('panel-body');
+            p1_p1.append(p1_p1_h3);
+            p1.append(p1_p1);
+            p1.append(kategorien[katName]);
+            $("#content").append(p1);
+        }
+
+        return katName;
+
+    }
 
 </script>
