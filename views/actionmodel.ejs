@@ -1,0 +1,147 @@
+<% layout('layout') -%>
+
+<script>
+
+    var actionmodels = <%-JSON.stringify(actionmodels)%>;
+    var apilinks = <%-JSON.stringify(apilinks)%>;
+    var devices = <%-JSON.stringify(devices)%>;
+
+    console.log(actionmodels);
+
+    $(document).ready(function() {
+
+        var sel = $("#selectActionModel");
+        var sel_apilinks = $("#selectAPILink");
+        var sel_devices = $("#selectDevice");
+
+        sel.append($('<option>', {
+            value: "",
+            text: "Bitte ActionModel waehlen..."
+        }));
+
+        for(id in actionmodels) {
+            sel.append($('<option>', {
+                value: id,
+                text: actionmodels[id].ActionDisplayName + " ("+actionmodels[id].ActionName+")"
+            }));
+        }
+
+        sel_apilinks.append($('<option>', {
+            value: "",
+            text: "Bitte APILink waehlen..."
+        }));
+
+        for(id in apilinks) {
+            sel_apilinks.append($('<option>', {
+                value: id,
+                text: apilinks[id].Name + " ("+apilinks[id].Kategorie+")"
+            }));
+        }
+
+        sel_devices.append($('<option>', {
+            value: "",
+            text: "Bitte Device waehlen..."
+        }));
+
+        for(id in devices) {
+            sel_devices.append($('<option>', {
+                value: id,
+                text: devices[id].Name + " ("+devices[id].Kategorie+")"
+            }));
+        }
+
+        sel_apilinks.change(function() {
+            sel_devices.val("");
+        });
+        sel_devices.change(function() {
+            sel_apilinks.val("");
+        });
+
+        sel.change(function() {
+            
+            if(this.value == "") {
+                $("#del").hide();
+            } else {
+                $("#del").show();
+            }
+
+            var actionModelId = this.value;
+
+
+            $("#selectDevice option").filter(function() {
+                return $(this).val() == actionmodels[actionModelId].DeviceID;
+            }).prop('selected', true);
+
+            $("#selectAPILink option").filter(function() {
+                return $(this).val() == actionmodels[actionModelId].APILinkID;
+            }).prop('selected', true);
+
+            $("#ActionName").val(actionmodels[actionModelId].ActionName);
+            $("#ActionDisplayName").val(actionmodels[actionModelId].ActionDisplayName);
+            $("#Duration").val(actionmodels[actionModelId].Duration);
+            $("#ExpectedOkValue").val(actionmodels[actionModelId].ExpectedOkValue);
+            $("#DisplayNameParameter1").val(actionmodels[actionModelId].DisplayNameParameter1);
+            $("#DisplayNameParameter2").val(actionmodels[actionModelId].DisplayNameParameter2);
+
+            $("#id").val(actionModelId);
+
+        });
+
+        $("#del").click(function() {
+            window.location.href = "actionmodel/delete/" + sel.val();
+        });
+
+    });
+
+</script>
+
+<select id="selectActionModel" class="form-control"></select>
+
+<form action="actionmodel" method="post" style="margin-top:50px;">
+
+    <input name="id" id="id" type="hidden">
+
+    <div class="form-group">
+        <label for="selectAPILink">APILink</label>
+        <select id="selectAPILink" name="selectAPILink" class="form-control"></select>
+    </div>
+
+    <div class="form-group">
+        <label for="selectDevice">Device</label>
+        <select id="selectDevice" name="selectDevice" class="form-control"></select>
+    </div>
+
+
+    <div class="form-group">
+        <label for="Name">ActionName</label>
+        <input type="text" class="form-control" id="ActionName" name="ActionName" placeholder="Unique Identification Name">
+    </div>
+    <div class="form-group">
+        <label for="Kategorie">ActionDisplayName</label>
+        <input type="text" class="form-control" id="ActionDisplayName" name="ActionDisplayName" placeholder="Nice Display Name">
+    </div>
+    <div class="form-group">
+        <label for="Kategorie">Duration <small>seconds</small></label>
+        <input type="text" class="form-control" id="Duration" name="Duration" placeholder="60">
+    </div>
+    <div class="form-group">
+        <label for="Kategorie">ExpectedOkValue</label>
+        <input type="text" class="form-control" id="ExpectedOkValue" name="ExpectedOkValue" placeholder="OK">
+    </div>
+    <div class="form-group">
+        <label for="Kategorie">DisplayNameParameter1</label>
+        <input type="text" class="form-control" id="DisplayNameParameter1" name="DisplayNameParameter1" placeholder="Example BYE - Exposure Seconds '1200'">
+    </div>
+    <div class="form-group">
+        <label for="Kategorie">DisplayNameParameter2</label>
+        <input type="text" class="form-control" id="DisplayNameParameter2" name="DisplayNameParameter2" placeholder="Example BYE - ISO '400'">
+    </div>
+
+    <button type="submit" class="btn btn-default">Absenden</button>
+</form>
+
+<br><br>
+
+<button class="btn btn-danger" style="display: none;" id="del">Ausgew&auml;hltes ActionModel l&ouml;schen</button>
+
+GotoAPI

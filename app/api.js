@@ -1,5 +1,6 @@
 var hm              = require('./homematic');
 var apilink         = require('./models/apilink');
+var actionModel     = require('./models/action_model');
 var config          = require('./../config');
 var request         = require('request');
 
@@ -51,6 +52,20 @@ var api = {
             } else {
                 res.status(404);
                 res.json({success: false, message: apilink + " nicht gefunden"});
+            }
+        });
+
+    },
+
+    validateActionModel: function(req, res, next, actionmodelid) {
+
+        actionModel.findById(actionmodelid, function(err, found_actionmodel) {
+            if(found_actionmodel) {
+                req.actionmodel = found_actionmodel;
+                next();
+            } else {
+                res.status(404);
+                res.json({success: false, message: actionmodelid + " nicht gefunden"});
             }
         });
 

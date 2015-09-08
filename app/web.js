@@ -1,5 +1,6 @@
 var devices         = require('./models/devices');
 var apilink         = require('./models/apilink');
+var actionModel     = require('./models/action_model');
 var hm              = require('./homematic');
 
 var web = {
@@ -60,6 +61,111 @@ var web = {
                 res.render('devices', { user: req.user, page: "devices", devices: devicelist, success: req.flash('success'), error: req.flash('error')});
             } else {
                 res.render('devices', { user: req.user, page: "devices", devices: {}, success: req.flash('success'), error: req.flash('error')});
+            }
+        });
+
+    },
+
+
+    /**
+     * Bearbeiten von ActionModels.
+     * @param req
+     * @param res
+     */
+    page_actionmodel: function(req, res) {
+        devices.find({}, function(err, devices) {
+            devicelist = {};
+            for (var i = 0; i <= devices.length - 1; i++) {
+                devicelist[devices[i].Address] = devices[i];
+            }
+            apilink.find({}, function (err, apilinks) {
+                apilinklist = {};
+                for (var i = 0; i <= apilinks.length - 1; i++) {
+                    apilinklist[apilinks[i]._id] = apilinks[i];
+                }
+                actionModel.find({}, function(err, actionmodels) {
+                    actionModelList = {};
+                    for (var i = 0; i <= actionmodels.length - 1; i++) {
+                        actionModelList[actionmodels[i]._id] = actionmodels[i];
+                    }
+                    res.render('actionmodel', { user: req.user, page: "actionmodel", actionmodels: actionModelList, devices: devicelist, apilinks: apilinklist, success: req.flash('success'), error: req.flash('error')});
+                });
+            });
+        });
+    },
+
+    /**
+     * Löschen eines ActionModels.
+     * @param req
+     * @param res
+     */
+    deleteAction: function(req, res) {
+        actionModel.findById(req.params.apilinkid, function(err, found_actionmodel) {
+            if(found_actionmodel) {
+                found_actionmodel.remove();
+                req.flash('success', "ActionModel gel&ouml;scht.");
+                return res.redirect('/actionmodel');
+            } else {
+                req.flash('error', "ActionModel nicht gefunden.");
+                return res.redirect('/actionmodel');
+            }
+        });
+    },
+
+    /**
+     * Hinzufügen/Bearbeiten von neuen ActionModels.
+     * @param req
+     * @param res
+     */
+    actionManagerPost: function(req, res) {
+
+        var id = req.body.id;
+        var DeviceID = req.body.selectDevice;
+        var APILinkID = req.body.selectAPILink;
+        var ActionName = req.body.ActionName;
+        var ActionDisplayName = req.body.ActionDisplayName;
+        var Duration = req.body.Duration;
+        var ExpectedOkValue = req.body.ExpectedOkValue;
+        var DisplayNameParameter1 = req.body.DisplayNameParameter1;
+        var DisplayNameParameter2 = req.body.DisplayNameParameter2;
+
+
+        actionModel.findById(id, function(err, found_actionmodel) {
+
+            if(found_actionmodel) {
+                found_actionmodel.DeviceID = DeviceID;
+                found_actionmodel.APILinkID = APILinkID;
+                found_actionmodel.ActionName = ActionName;
+                found_actionmodel.ActionDisplayName = ActionDisplayName;
+                found_actionmodel.Duration = Duration;
+                found_actionmodel.ExpectedOkValue = ExpectedOkValue;
+                found_actionmodel.DisplayNameParameter1 = DisplayNameParameter1;
+                found_actionmodel.DisplayNameParameter2 = DisplayNameParameter2;
+                found_actionmodel.save();
+                req.flash('success', "ActionModel aktualisiert.");
+                return res.redirect('/actionmodel');
+            } else {
+
+                var amodel = new actionModel({
+                    _DeviceID: DeviceID,
+                    _APILinkID: APILinkID,
+                    ActionName: ActionName,
+                    ActionDisplayName: ActionDisplayName,
+                    Duration: Duration,
+                    ExpectedOkValue: ExpectedOkValue,
+                    DisplayNameParameter1: DisplayNameParameter1,
+                    DisplayNameParameter2: DisplayNameParameter2
+                });
+
+                amodel.save(function (err) {
+                    if (err) {
+                        req.flash('error', "Konnte das ActionModel nicht hinzuf%uuml;gen. Fehler in der Datenbank.");
+                        return res.redirect('/actionmodel');
+                    } else {
+                        req.flash('success', "Neues ActionModel hinzugef&uuml;gt.");
+                        return res.redirect('/actionmodel');
+                    }
+                });
             }
         });
 

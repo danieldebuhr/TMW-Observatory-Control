@@ -20,6 +20,7 @@ router.get('/api', function(req, res) {
 router.param('addr', api.validateDevice);
 router.param('state', api.validateState);
 router.param('apilinkid', api.validateApiLink);
+router.param('actionmodel', api.validateActionModel);
 
 /**
  * Routen für Device-State
@@ -49,12 +50,19 @@ router.all('/*', [authApp]);  //tokenAuth.checkToken
 router.get('/', web.page_index);
 router.get('/benutzer', web.user);
 router.get('/account', web.account);
+
 router.get('/devices', web.page_devices);
 router.post('/deviceManager', web.deviceManagerPost);
 router.get('/deleteDevice/:addr', web.deleteDevice);
+
 router.get('/apilinks', web.page_apilink);
 router.post('/apilinkManager', web.apilinkManagerPost);
 router.get('/deleteApilink/:apilinkid', web.deleteApilink);
+
+router.get('/actionmodel/delete/:actionmodelid', web.deleteAction);
+router.get('/actionmodel', web.page_actionmodel);
+router.post('/actionmodel', web.actionManagerPost);
+
 
 module.exports = router;
 
