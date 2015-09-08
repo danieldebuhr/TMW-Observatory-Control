@@ -15,22 +15,22 @@
 
 @media only screen and (max-device-width: 1023px) {
 
-    .form-group, button {
+    #mainpage .form-group, #mainpage button {
         width: 100%;
     }
-    .form-control {
+    #mainpage .form-control {
         display: inline-block !important;
     }
-    .button-group {
+    #mainpage .button-group {
         text-align: center;
         margin-left: 0px !important;
         margin-right: 0px !important;
         margin-top: 10px;
     }
-    .button-group input {
+    #mainpage .button-group input {
         width: 100% !important;
     }
-    .panel-body button {
+    #mainpage .panel-body button {
         margin-bottom: 10px;
     }
 
