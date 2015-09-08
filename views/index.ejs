@@ -295,18 +295,33 @@
         }
 
         if (!kategorien[katName]) {
+            var id = makeid();
             var p1 = $("<div/>").addClass('panel').addClass('panel-primary');
-            var p1_p1 = $("<div/>").addClass('panel-heading');
+            var p1_p1 = $("<div/>").addClass('panel-heading').css('cursor', 'pointer');
             var p1_p1_h3 = $("<h3/>").addClass('panel-title').text(katName);
-            kategorien[katName] = $("<div/>").addClass('panel-body');
+            kategorien[katName] = $("<div/>").addClass('panel-body').css('display', 'none').attr('id', id);
             p1_p1.append(p1_p1_h3);
             p1.append(p1_p1);
             p1.append(kategorien[katName]);
+            p1_p1.click(function() {
+                $("#" + id).toggle();
+            });
             $("#content").append(p1);
         }
 
         return katName;
 
+    }
+
+    function makeid()
+    {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for( var i=0; i < 5; i++ )
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
     }
 
 </script>
